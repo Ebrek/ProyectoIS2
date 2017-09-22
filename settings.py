@@ -12,9 +12,12 @@ PLAYER_GRAV = 0.6
 
 
 #Plataformas de Inicio
-PLATFORM_LIST = [(0,HEIGHT -40, WIDTH, 40),
-                (400,350,300,10),
-                (150,200,400,20)]
+#POSICION x/ POSICIOn Y, largo, altura
+PLATFORM_LIST = [(0, HEIGHT -40, WIDTH , 40),
+                (WIDTH + 50, HEIGHT -40, WIDTH , 40),
+                (200,350,50,10),
+                (150,200,40,20),
+                (20,20,80,40)]
 
 
 

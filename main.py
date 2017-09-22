@@ -49,6 +49,15 @@ class Game:
                 self.player.pos.y = hits[0].rect.top+1
                 self.player.vel.y = 0
 
+        #si el jugador sube - centrar jugador
+        if self.player.rect.right >= WIDTH / 2:
+            self.player.pos.x -= abs(self.player.vel.x)
+            for plat in self. platforms:
+                plat.rect.x -= abs(self.player.vel.x)
+
+
+
+
     def events(self):
         # Game Loop - events
         for event in pg.event.get():
