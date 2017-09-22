@@ -1,7 +1,7 @@
 # game options/settings
 TITLE = "Froggy and the Splitters"
-WIDTH = 800
-HEIGHT = 480
+WIDTH = 1024
+HEIGHT = 768
 FPS = 60
 
 
@@ -9,6 +9,7 @@ FPS = 60
 PLAYER_ACC = 0.5
 PLAYER_FRICTION = -0.12
 PLAYER_GRAV = 0.6
+PLAYER_JUMP = 15
 
 
 #Plataformas de Inicio

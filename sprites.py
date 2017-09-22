@@ -21,7 +21,7 @@ class Player(pg.sprite.Sprite):
         hits = pg.sprite.spritecollide(self,self.game.platforms,False)
         self.rect.x -=1
         if hits:
-            self.vel.y = -15
+            self.vel.y = - PLAYER_JUMP
 
 
     def update(self):
@@ -31,6 +31,7 @@ class Player(pg.sprite.Sprite):
             self.acc.x = -PLAYER_ACC
         if keys[pg.K_RIGHT]:
             self.acc.x =PLAYER_ACC
+            
 
 
 

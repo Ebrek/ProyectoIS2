@@ -49,14 +49,18 @@ class Game:
                 self.player.pos.y = hits[0].rect.top+1
                 self.player.vel.y = 0
 
-        #si el jugador sube - centrar jugador
-        if self.player.rect.right >= WIDTH / 2:
-            self.player.pos.x -= abs(self.player.vel.x)
-            for plat in self. platforms:
-                plat.rect.x -= abs(self.player.vel.x)
+        #si el jugador va hacia la derecha - centrar jugador
+        keys = pg.key.get_pressed()
+        if keys[pg.K_RIGHT]:
+            if self.player.rect.right >= WIDTH / 2:
+                self.player.pos.x -= abs(self.player.vel.x)
+                for plat in self. platforms:
+                    plat.rect.x -= abs(self.player.vel.x)
 
 
-
+                # Si nos caemomos del mapa GAME over
+                if self.player.rect.bottom > HEIGHT:
+                    self.playing = False
 
     def events(self):
         # Game Loop - events
@@ -80,11 +84,40 @@ class Game:
 
     def show_start_screen(self):
         # game splash/start screen
-        pass
+        imagen1 = pg.image.load("img/logo.png")
+        imagen1 =pg.transform.scale(imagen1,(550,200))
+
+
+
+        self.screen.fill(WHITE)
+        self.screen.blit(imagen1,(258,200))
+        pg.display.flip()
+        self.wait_for_key()
+
 
     def show_go_screen(self):
         # game over/continue
         pass
+
+
+    def wait_for_key(self):
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    waiting = False
+                    self.running = False
+                if event.type == pg.KEYUP:
+                    waiting = False
+
+
+    def draw_text(self,text,size,color,x,y):
+        font = pg.font.Font(self.font_name,size)
+        text_surface = font.render(text,True,color)
+        text_rect = text_surface.get_rect()
+        text_rect.midtop = (x,y)
+        self.screen.blit(text_surface, text_rect)
 
 g = Game()
 g.show_start_screen()
