@@ -24,6 +24,7 @@ class Game:
 
         self.player = Player(self)
         self.all_sprites.add(self.player)
+        self.paused = False
 
         for plat in PLATFORM_LIST:
             p= Platform(*plat)
@@ -37,7 +38,8 @@ class Game:
         while self.playing:
             self.clock.tick(FPS)
             self.events()
-            self.update()
+            if not self.paused:
+                self.update()
             self.draw()
 
     def update(self):
@@ -50,8 +52,12 @@ class Game:
                 for plat in self. platforms:
                     plat.rect.x -= abs(self.player.vel.x)
                 self.player.pos.x -= abs(self.player.vel.x)
+        #sí el jugador va hacia la izquierda, no lo deja pasar el mapa
+        if self.player.rect.left < 0 :
+            self.player.rect.left = 0
 
                 # Si nos caemomos del mapa GAME over
+
         if self.player.rect.bottom > HEIGHT:
             self.playing = False
 
@@ -83,6 +89,8 @@ class Game:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_SPACE:
                     self.player.jump()
+                if event.key == pg.K_p:
+                    self.paused = not self.paused
 
     def draw(self):
         # Game Loop - draw
