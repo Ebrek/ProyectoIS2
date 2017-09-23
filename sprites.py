@@ -31,15 +31,15 @@ class Player(pg.sprite.Sprite):
             self.acc.x = -PLAYER_ACC
         if keys[pg.K_RIGHT]:
             self.acc.x =PLAYER_ACC
-            
+
 
 
 
         #friccion
         self.acc.x += self.vel.x * PLAYER_FRICTION
         #movimiento
-        self.vel += self.acc
-        self.pos += self.vel + 0.5 * self.acc
+        self.vel +=  1.5 * self.acc
+        self.pos += self.vel
         #wrap around the scrrens
     #    if self.pos.x > WIDTH:
     #        self.pos.x = 0

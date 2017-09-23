@@ -1,3 +1,6 @@
+
+# no se usa
+
 import pygame
 
 class player

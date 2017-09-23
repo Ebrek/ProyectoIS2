@@ -2,7 +2,7 @@ import pygame as pg
 import random
 from settings import *
 from sprites import *
-
+import copy
 
 class Game:
 
@@ -14,6 +14,7 @@ class Game:
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
         self.running = True
+        self.font_name=pg.font.match_font(FONT_NAME)
 
     def new(self):
         # start a new game
@@ -42,25 +43,33 @@ class Game:
     def update(self):
         # Game Loop - Update
         self.all_sprites.update()
-        #cuando el juegdor cae sobre plataforma
-        if self.player.vel.y>0:
-            hits = pg.sprite.spritecollide(self.player, self.platforms, False)
-            if hits:
-                self.player.pos.y = hits[0].rect.top+1
-                self.player.vel.y = 0
-
         #si el jugador va hacia la derecha - centrar jugador
         keys = pg.key.get_pressed()
         if keys[pg.K_RIGHT]:
             if self.player.rect.right >= WIDTH / 2:
-                self.player.pos.x -= abs(self.player.vel.x)
                 for plat in self. platforms:
                     plat.rect.x -= abs(self.player.vel.x)
-
+                self.player.pos.x -= abs(self.player.vel.x)
 
                 # Si nos caemomos del mapa GAME over
-                if self.player.rect.bottom > HEIGHT:
-                    self.playing = False
+        if self.player.rect.bottom > HEIGHT:
+            self.playing = False
+
+        #cuando el juegdor cae sobre plataforma
+        if self.player.vel.y>0:
+            for plat in self. platforms:
+                col = pg.sprite.collide_rect(self.player, plat)
+                if col == True:
+                    self.player.pos.y = plat.rect.top+1
+                    self.player.vel.y = 0
+            #nigga=copy.copy(self.platforms)
+            #hits = pg.sprite.spritecollide(self.player, nigga, False)
+            #if hits:
+            #    self.player.pos.y = hits[0].rect.top+1
+            #    self.player.vel.y = 0
+            #    if keys[pg.K_RIGHT]:
+            #        hits[0].rect.x -= abs(self.player.vel.x)
+
 
     def events(self):
         # Game Loop - events
@@ -87,13 +96,12 @@ class Game:
         imagen1 = pg.image.load("img/logo.png")
         imagen1 =pg.transform.scale(imagen1,(550,200))
 
+        self.screen.fill(LIGHTBLUE)
+        self.screen.blit(imagen1,(WIDTH/4,HEIGHT/4))
+        self.draw_text("PRESS ANY KEY",32,BLACK,WIDTH/2,HEIGHT*3 /4)
 
-
-        self.screen.fill(WHITE)
-        self.screen.blit(imagen1,(258,200))
         pg.display.flip()
         self.wait_for_key()
-
 
     def show_go_screen(self):
         # game over/continue
