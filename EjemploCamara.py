@@ -54,7 +54,7 @@ def main():
         "P                                          P",
         "P                                          P",
         "P                                          P",
-        "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",]
+        "PPPPPPPPPPPPPPPPPPPPPPPPPPP   PPPPPPPPPPPPPP",]
     # build the level
     for row in level:
         for col in row:
@@ -74,13 +74,16 @@ def main():
     total_level_height = len(level)*32
     camera = Camera(complex_camera, total_level_width, total_level_height)
     entities.add(player)
-
-    while 1:
+    done = False
+    #while 1:
+    while not done:
         timer.tick(60)
 
         for e in pygame.event.get():
             #if e.type == QUIT: raise SystemExit, "QUIT"
-            if e.type == KEYDOWN and e.key == K_ESCAPE:
+            if e.type == QUIT: 
+                done = True
+            #if e.type == KEYDOWN and e.key == K_ESCAPE:
             #    raise SystemExit, "ESCAPE"
             if e.type == KEYDOWN and e.key == K_UP:
                 up = True
