@@ -2,14 +2,13 @@
 import pygame as pg
 from settings import *
 vec = pg.math.Vector2
-#cargar img de froggy
-froggyImg =pg.image.load('img/froggy.png')
+
 class Player(pg.sprite.Sprite):
     def __init__(self,game):
         pg.sprite.Sprite.__init__(self)
         self.game = game
-        self.image = froggyImg
-        self.image.set_colorkey(BLACK)
+        self.image = pg.Surface((30,40))
+        self.image.fill(YELLOW)
         self.rect=self.image.get_rect()
         self.rect.center = (WIDTH/2,HEIGHT/2)
         self.pos = vec(WIDTH / 2, HEIGHT / 2)
