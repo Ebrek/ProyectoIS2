@@ -1,8 +1,7 @@
 
 import pygame
- 
 from pygame import *
-
+import os
 WIN_WIDTH = 800
 WIN_HEIGHT = 640
 HALF_WIDTH = int(WIN_WIDTH / 2)
@@ -12,6 +11,8 @@ DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
 DEPTH = 32
 FLAGS = 0
 CAMERA_SLACK = 30
+PATH=os.path.dirname(__file__) +"/Resources/"#+ "/IngSW2_Froggy_Leo/"
+
 
 class Level():
     def __init__(self, level, player_settings, bg_music):
@@ -47,7 +48,7 @@ class Level():
 
         self.camera = Camera(Camera.complex_camera, self.total_level_width, self.total_level_height)
         self.entities.add(self.player)
-        self.backGround = Background('bg1.png', [0,0], (1280, 720))
+        self.backGround = Background(PATH+'bg1.png', [0,0], (1280, 720))
 
         self.playmusic(bg_music)
     def update(self, up, down, left, right, space, running):
@@ -103,12 +104,12 @@ class Media_Screen():
 
 class Start_Screen(Media_Screen):
     def __init__(self, timer):
-        Media_Screen.__init__(self, timer,(Background('bg1.png', [0,0], (1280, 720))))
+        Media_Screen.__init__(self, timer,(Background(PATH+'bg1.png', [0,0], (1280, 720))))
         self.screen=pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
         self.show_start_screen()
     def show_start_screen(self):
         # game splash/start screen
-        image = pygame.image.load("logo.png")
+        image = pygame.image.load(PATH+"logo.png")
         image = pygame.transform.scale(image,(550,200))
         image_width, image_height= image.get_size()
         #self.screen.fill("#0033FF")
@@ -153,8 +154,8 @@ def main():
         "P                                                                                    P",
         "P                                                                                    E",
         "PPPPPPPPPPPPPPPPPPPPPPPPPPP   PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",]
-    player_settings = (32, 32, "froggy.png")
-    level = Level(level, player_settings, 'bg_music1.ogg')
+    player_settings = (32, 32,PATH+ "froggy.png")
+    level = Level(level, player_settings, PATH+'bg_music1.ogg')
     
 
     done = play_again = False
@@ -168,8 +169,9 @@ def main():
             if e.type == KEYDOWN and e.key == K_ESCAPE:
                 paused = True#change for paused menu
                 pause()
+                up = down = left = right = space = running = False
                 pygame.event.clear()
-                continue
+                break
             if e.type == KEYDOWN and e.key == K_UP:
                 up = True
             if e.type == KEYDOWN and e.key == K_DOWN:
