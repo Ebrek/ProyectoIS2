@@ -1,6 +1,7 @@
 
 import pygame
 from pygame import *
+import math
 import os
 WIN_WIDTH = 800
 WIN_HEIGHT = 640
@@ -11,7 +12,9 @@ DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
 DEPTH = 32
 FLAGS = 0
 CAMERA_SLACK = 30
-PATH=os.path.dirname(__file__) +"/Resources/"#+ "/IngSW2_Froggy_Leo/"
+#PATH=os.path.dirname(__file__) +"/Resources/"#+ "/IngSW2_Froggy_Leo/"
+
+PATH="Resources/"#+ "/IngSW2_Froggy_Leo/"
 
 
 class Level():
@@ -24,7 +27,7 @@ class Level():
         self.entities = pygame.sprite.Group()
         
         self.platforms = []
-
+        self.enemies = []
         x = y = 0
         self.level = level
         # build the level
@@ -38,6 +41,10 @@ class Level():
                     e = ExitBlock(x, y)
                     self.platforms.append(e)
                     self.entities.add(e)
+                if col == "Q":
+                    q = EnemyMosquito(x, y)
+                    self.enemies.append(q)
+                    self.entities.add(q)
                 x += 32
             y += 32
             x = 0
@@ -63,7 +70,7 @@ class Level():
         # update player, draw everything else
         if(self.player.rect.y>self.total_level_height):
             return False
-        self.player.update(up, down, left, right, space, running, self.platforms)
+        self.player.update(up, down, left, right, space, running, self.platforms, self.enemies)
         for e in self.entities:
             self.screen.blit(e.image, self.camera.apply(e))
     def playmusic(self, file):
@@ -152,7 +159,7 @@ def main():
         "P                                                                                    P",
         "P                                                                                    P",
         "P                                                                                    P",
-        "P                                                                                    E",
+        "P                    Q                                          Q                    E",
         "PPPPPPPPPPPPPPPPPPPPPPPPPPP   PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",]
     player_settings = (32, 32,PATH+ "froggy.png")
     level = Level(level, player_settings, PATH+'bg_music1.ogg')
@@ -240,6 +247,80 @@ class Entity(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
 
+class EnemyMosquito(Entity):
+    def __init__(self, x, y):
+        Entity.__init__(self)
+        self.xvel = 4.0
+        self.yvel = 4.0
+
+        self.onGround = False
+        self._image_origin = pygame.image.load(PATH + "mosquito1.png")
+        self._image_origin = pygame.transform.scale(self._image_origin, (32, 32))
+        self._image_toLeft = pygame.transform.flip(self._image_origin, True, False)
+        self.image  = self._image_origin
+        image_rect = (self.image.get_rect().size)
+        self.image.convert()
+        self.rect = Rect(x, y, image_rect[0], image_rect[1])
+    def update(self, platforms, posX, posY):
+        # increment in x direction
+        #self.rect.left += self.xvel
+        # do x-axis collisions
+        self.xvel = 4.0
+        self.yvel = 4.0
+
+
+        self.collide(self.xvel, 0, platforms)
+        # increment in y direction
+        #self.rect.top += self.yvel
+        # assuming we're in the air
+        #self.onGround = False;
+        # do y-axis collisio ns
+        self.collide(0, self.yvel, platforms)
+
+        self.move_towards_player(posX, posY)
+
+        a = Surface((32, 32))
+        a.convert()
+        a.fill(Color("#d8c217")) # change for image
+        b = Rect(32, 32, 32, 32)
+    def move_towards_player(self, posX, posY):
+        # find normalized direction vector (dx, dy) between enemy and player
+        dx, dy = self.rect.x - posX, self.rect.y - posY
+        dist = math.hypot(dx, dy) #math.sqrt(dx*dx + dy*dy) 
+        try:
+            dx, dy =  dx*-1.0 / dist, dy*-1.0 / dist
+        except ZeroDivisionError:
+            print("Divided by zero")
+        # move along this normalized vector towards the player at current speed
+        self.xvel, self.yvel = dx * self.xvel, dy * self.yvel
+        self.rect.x += self.xvel
+        self.rect.y += self.yvel
+        if dx > 0:
+            self.image = self._image_toLeft
+        else:
+            self.image = self._image_origin
+    def observar(self, posX, posY, platforms):
+        self.update(platforms, posX, posY)
+    def collide(self, xvel, yvel, platforms):
+        for p in platforms:
+            if pygame.sprite.collide_rect(self, p):
+                if abs(self.rect.right - p.rect.left) < 5:
+                    self.rect.right = p.rect.left
+                    self.xvel = 0
+                    print ("Enemy collide right")
+                if abs(self.rect.left - p.rect.right) < 5:
+                    self.rect.left = p.rect.right
+                    self.xvel = 0
+                    print ("Enemy collide left")
+                if abs(self.rect.bottom - p.rect.top) < 5:
+                    self.rect.bottom = p.rect.top
+                    self.yvel = 0
+                if abs(self.rect.top - p.rect.bottom) < 5:
+                    self.rect.top = p.rect.bottom
+                    self.yvel = 0
+                    print ("Enemy collide top")
+
+
 class Player(Entity):
     def __init__(self, x, y, image_path):
         Entity.__init__(self)
@@ -256,7 +337,7 @@ class Player(Entity):
         self.rect = Rect(x, y, image_rect[0], image_rect[1])
         self.tongue = 0
 
-    def update(self, up, down, left, right, space, running, platforms):
+    def update(self, up, down, left, right, space, running, platforms, enemies):
         if up:
             # only jump if on the ground
             if self.onGround: self.yvel -= 10
@@ -293,6 +374,7 @@ class Player(Entity):
         # do y-axis collisions
         self.collide(0, self.yvel, platforms)
 
+        self.beobserver(enemies, platforms)
 
         a = Surface((32, 32))
         a.convert()
@@ -318,6 +400,31 @@ class Player(Entity):
                     self.rect.top = p.rect.bottom
                     self.yvel = 0
                     print ("collide top")
+
+    def collide_enemies(self, xvel, yvel, enemies):
+        for p in enemies:
+            if pygame.sprite.collide_rect(self, p):
+                if isinstance(p, ExitBlock):
+                    pygame.event.post(pygame.event.Event(QUIT))
+                if xvel > 0:
+                    self.rect.right = p.rect.left
+                    print ("collide right")
+                if xvel < 0:
+                    self.rect.left = p.rect.right
+                    print ("collide left")
+                if yvel > 0:
+                    self.rect.bottom = p.rect.top
+                    self.onGround = True
+                    self.yvel = 0
+                if yvel < 0:
+                    self.rect.top = p.rect.bottom
+                    self.yvel = 0
+                    print ("collide top")
+    def beobserver(self, enemies, platforms):
+        for q in enemies:
+            if isinstance(q, EnemyMosquito):
+                q.observar(self.rect.x, self.rect.y, platforms)
+
 
 class Platform(Entity):
     def __init__(self, x, y):
