@@ -45,13 +45,19 @@ class Level():
                     q = EnemyMosquito(x, y)
                     self.enemies.append(q)
                     self.entities.add(q)
+                if col == "S":
+                    s = EnemySpider(x, y)
+                    self.enemies.append(s)
+                    self.entities.add(s)
+                if col == "F":
+                    self.player = Player(x, y, player_settings[2])
                 x += 32
             y += 32
             x = 0
         self.total_level_width  = len(level[0])*32
         self.total_level_height = len(level)*32
 
-        self.player = Player(player_settings[0],player_settings[1],player_settings[2])
+        #self.player = Player(player_settings[0],player_settings[1],player_settings[2])
 
         self.camera = Camera(Camera.complex_camera, self.total_level_width, self.total_level_height)
         self.entities.add(self.player)
@@ -145,20 +151,20 @@ def main():
         "P                                                                                    P",
         "P    PPPPPPPP                                                                        P",
         "P                                                                                    P",
-        "P                          PPPPPPP                           PPPPPP                  P",
+        "P                          PPPPPPP              Q            PPPPPP                  P",
         "P                                                                                    P",
         "P                                                                                    P",
         "P                                                                     PPPPPPP        P",
         "P                                                                                    P",
         "P                                     PPPPPP                                         P",
         "P                                                                                    P",
-        "P                                                 PPPPPPPPPPP                        P",
+        "P    F                                            PPPPPPPPPPP                        P",
         "P                                                                                    P",
         "P                 PPPPPPPPPPP                                                        P",
         "P                                                                                    P",
         "P                                                                                    P",
         "P                                                                                    P",
-        "P                    Q                                          Q                    E",
+        "P                    S                                          Q                    E",
         "PPPPPPPPPPPPPPPPPPPPPPPPPPP   PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",]
     player_settings = (32, 32,PATH+ "froggy.png")
     level = Level(level, player_settings, PATH+'bg_music1.ogg')
@@ -267,6 +273,7 @@ class EnemyMosquito(Entity):
         self.xvel = 4.0
         self.yvel = 4.0
 
+        self.move_towards_player(posX, posY)
 
         self.collide(self.xvel, 0, platforms)
         # increment in y direction
@@ -276,7 +283,6 @@ class EnemyMosquito(Entity):
         # do y-axis collisio ns
         self.collide(0, self.yvel, platforms)
 
-        self.move_towards_player(posX, posY)
 
         a = Surface((32, 32))
         a.convert()
@@ -319,6 +325,72 @@ class EnemyMosquito(Entity):
                     self.yvel = 0
                     print ("Enemy collide top")
 
+class EnemySpider(Entity):
+    def __init__(self, x, y):
+        Entity.__init__(self)
+        self.xvel = 4.0
+        self.yvel = 4.0
+
+        self.onGround = False
+        self._image_origin = pygame.image.load(PATH + "spider1.png")
+        self._image_origin = pygame.transform.scale(self._image_origin, (32, 32))
+        self._image_toLeft = pygame.transform.flip(self._image_origin, True, False)
+        self.image  = self._image_origin
+        image_rect = (self.image.get_rect().size)
+        self.image.convert()
+        self.rect = Rect(x, y, image_rect[0], image_rect[1])
+    def update(self, platforms, posX, posY):
+        # increment in x direction
+        #self.rect.left += self.xvel
+        # do x-axis collisions
+        self.xvel = 7.0
+        self.yvel = 4.0
+
+        self.move_towards_player(posX, posY)
+
+        self.collide(self.xvel, 0, platforms)
+        # increment in y direction
+        #self.rect.top += self.yvel
+        # assuming we're in the air
+        #self.onGround = False;
+        # do y-axis collisio ns
+        self.collide(0, self.yvel, platforms)
+
+
+        a = Surface((32, 32))
+        a.convert()
+        a.fill(Color("#d8c217")) # change for image
+        b = Rect(32, 32, 32, 32)
+    def move_towards_player(self, posX, posY):
+        dx = posX - self.rect.x
+        self.rect.y += 4.0
+        if dx > 0:
+            self.image = self._image_toLeft
+            self.rect.x +=self.xvel
+        elif dx < 0:
+            self.image = self._image_origin
+            self.rect.x -=self.xvel
+
+    def observar(self, posX, posY, platforms):
+        self.update(platforms, posX, posY)
+    def collide(self, xvel, yvel, platforms):
+        for p in platforms:
+            if pygame.sprite.collide_rect(self, p):
+                if abs(self.rect.right - p.rect.left) < 5:
+                    self.rect.right = p.rect.left
+                    self.xvel = 0
+                    print ("Enemy collide right")
+                if abs(self.rect.left - p.rect.right) < 5:
+                    self.rect.left = p.rect.right
+                    self.xvel = 0
+                    print ("Enemy collide left")
+                if abs(self.rect.bottom - p.rect.top) < 5:
+                    self.rect.bottom = p.rect.top
+                    self.yvel = 0
+                if abs(self.rect.top - p.rect.bottom) < 5:
+                    self.rect.top = p.rect.bottom
+                    self.yvel = 0
+                    print ("Enemy collide top")
 
 class Player(Entity):
     def __init__(self, x, y, image_path):
@@ -414,8 +486,8 @@ class Player(Entity):
         return False
     def beobserver(self, enemies, platforms):
         for q in enemies:
-            if isinstance(q, EnemyMosquito):
-                q.observar(self.rect.x, self.rect.y, platforms)
+            #if isinstance(q, Enemy):
+            q.observar(self.rect.x, self.rect.y, platforms)
 
 
 class Platform(Entity):
