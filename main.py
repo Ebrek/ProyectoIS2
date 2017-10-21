@@ -68,9 +68,8 @@ class Level():
         self.screen.fill([255, 255, 255])
         self.screen.blit(self.backGround.image, self.backGround.rect)
         # update player, draw everything else
-        if(self.player.rect.y>self.total_level_height):
+        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.total_level_height):
             return False
-        self.player.update(up, down, left, right, space, running, self.platforms, self.enemies)
         for e in self.entities:
             self.screen.blit(e.image, self.camera.apply(e))
     def playmusic(self, file):
@@ -337,7 +336,8 @@ class Player(Entity):
         self.rect = Rect(x, y, image_rect[0], image_rect[1])
         self.tongue = 0
 
-    def update(self, up, down, left, right, space, running, platforms, enemies):
+    def update(self, up, down, left, right, space, running, platforms, enemies, level_high):
+        vida = True
         if up:
             # only jump if on the ground
             if self.onGround: self.yvel -= 10
@@ -373,13 +373,17 @@ class Player(Entity):
         self.onGround = False;
         # do y-axis collisions
         self.collide(0, self.yvel, platforms)
-
+        vida = self.collide_enemies(enemies)
         self.beobserver(enemies, platforms)
-
+        
         a = Surface((32, 32))
         a.convert()
         a.fill(Color("#d8c217")) # change for image
         b = Rect(32, 32, 32, 32)
+        if(self.rect.y>level_high or (vida)):
+            return False
+        else:
+            return True
 
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
@@ -401,25 +405,13 @@ class Player(Entity):
                     self.yvel = 0
                     print ("collide top")
 
-    def collide_enemies(self, xvel, yvel, enemies):
-        for p in enemies:
-            if pygame.sprite.collide_rect(self, p):
-                if isinstance(p, ExitBlock):
-                    pygame.event.post(pygame.event.Event(QUIT))
-                if xvel > 0:
-                    self.rect.right = p.rect.left
-                    print ("collide right")
-                if xvel < 0:
-                    self.rect.left = p.rect.right
-                    print ("collide left")
-                if yvel > 0:
-                    self.rect.bottom = p.rect.top
-                    self.onGround = True
-                    self.yvel = 0
-                if yvel < 0:
-                    self.rect.top = p.rect.bottom
-                    self.yvel = 0
-                    print ("collide top")
+    def collide_enemies(self, enemies):
+        for e in enemies:
+            if pygame.sprite.collide_rect(self, e):
+                print("--------CHOCA------")
+                return True
+                #pygame.event.post(pygame.event.Event(QUIT))
+        return False
     def beobserver(self, enemies, platforms):
         for q in enemies:
             if isinstance(q, EnemyMosquito):
