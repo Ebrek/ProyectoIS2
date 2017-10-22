@@ -34,7 +34,11 @@ class Level():
         for row in level:
             for col in row:
                 if col == "P":
-                    p = Platform(x, y)
+                    p = Platform(x, y, "platform/jungle_pack_03.png")
+                    self.platforms.append(p)
+                    self.entities.add(p)
+                if col == "2":
+                    p = Platform(x, y, "platform/jungle_pack_35.png")
                     self.platforms.append(p)
                     self.entities.add(p)
                 if col == "E":
@@ -150,7 +154,7 @@ def main():
         "P                                                                                    P",
         "P                                                                                    P",
         "P    PPPPPPPP                                                                        P",
-        "P                                                                                    P",
+        "P                             S                                                      P",
         "P                          PPPPPPP              Q            PPPPPP                  P",
         "P                                                                                    P",
         "P                                                                                    P",
@@ -160,11 +164,11 @@ def main():
         "P                                                                                    P",
         "P    F                                            PPPPPPPPPPP                        P",
         "P                                                                                    P",
-        "P                 PPPPPPPPPPP                                                        P",
+        "P                 22222222222                                                        P",
         "P                                                                                    P",
         "P                                                                                    P",
         "P                                                                                    P",
-        "P                    S                                          Q                    E",
+        "P                                                               Q                    E",
         "PPPPPPPPPPPPPPPPPPPPPPPPPPP   PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",]
     player_settings = (32, 32,PATH+ "froggy.png")
     level = Level(level, player_settings, PATH+'bg_music1.ogg')
@@ -491,19 +495,22 @@ class Player(Entity):
 
 
 class Platform(Entity):
-    def __init__(self, x, y):
+    def __init__(self, x, y, image_path):
         Entity.__init__(self)
-        self.image = Surface((32, 32))
+
+        self._image_origin = pygame.image.load(PATH + image_path)
+        self._image_origin = pygame.transform.scale(self._image_origin, (32, 32))
+        self.image  = self._image_origin
+        image_rect = self.image.get_rect().size
         self.image.convert()
-        self.image.fill(Color("#d8c217")) # change for image
-        self.rect = Rect(x, y, 32, 32)
+        self.rect = Rect(x, y, image_rect[0], image_rect[1])
 
     def update(self):
         pass
 
 class ExitBlock(Platform):
     def __init__(self, x, y):
-        Platform.__init__(self, x, y)
+        Platform.__init__(self, x, y, "platform/18.png")
         self.image.fill(Color("#0033FF"))
 
 if __name__ == "__main__":
