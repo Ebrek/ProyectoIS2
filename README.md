@@ -1,4 +1,9 @@
 
+
+instalar: pygame, Pillow, numpy
+windows: py -m pip install <nom_paquete> --user
+
+----------------------------------
 aprobado -> queda esta good
 revisado, sujeto a cambios -> se reviso pero cambios pequeños
 no aprobado -> para rehacer

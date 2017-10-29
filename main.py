@@ -1,8 +1,10 @@
-
-import pygame
+# -*- coding: utf-8 -*-
+import pygame, sys, os
+from PIL import Image, ImageOps
+import numpy
 from pygame import *
 import math
-import os
+import _thread
 WIN_WIDTH = 800
 WIN_HEIGHT = 640
 HALF_WIDTH = int(WIN_WIDTH / 2)
@@ -12,33 +14,60 @@ DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
 DEPTH = 32
 FLAGS = 0
 CAMERA_SLACK = 30
-#PATH=os.path.dirname(__file__) +"/Resources/"#+ "/IngSW2_Froggy_Leo/"
 
-PATH="Resources/"#+ "/IngSW2_Froggy_Leo/"
-
+IMAGE_SIZES = {}
+IMAGES = {}
+PATH = "Resources/"
 
 class Level():
     def __init__(self, level, player_settings, bg_music):
         self.screen = pygame.display.set_mode(DISPLAY, FLAGS, DEPTH)
         self.bg = pygame.Surface((32,32))
-        #self.bg =pygame.image.load("bg1.png")
         self.bg.convert()
-        #self.bg.fill(Color("#000000")) 
         self.entities = pygame.sprite.Group()
-        
+
         self.platforms = []
+        self.decorations = []
         self.enemies = []
         x = y = 0
         self.level = level
         # build the level
+
+        enemigo_test = None
         for row in level:
             for col in row:
+                if col == "1":
+                    p = Platform(x, y, "platform/jungle_pack_07.png")
+                    self.platforms.append(p)
+                    self.entities.add(p)
+
+                if col == "2":
+                    p = Platform(x, y, "platform/jungle_pack_35.png")
+                    self.platforms.append(p)
+                    self.entities.add(p)
                 if col == "P":
+                    p = Platform(x, y, "platform/jungle_pack_05.png")
+                    self.platforms.append(p)
+                    self.entities.add(p)
+                if col == "3":
                     p = Platform(x, y, "platform/jungle_pack_03.png")
                     self.platforms.append(p)
                     self.entities.add(p)
-                if col == "2":
-                    p = Platform(x, y, "platform/jungle_pack_35.png")
+                if col == "4":
+                    p = Platform(x, y, "platform/jungle_pack_11.png")
+                    self.platforms.append(p)
+                    self.entities.add(p)
+
+                if col == "5":
+                    p = Platform(x, y, "platform/jungle_pack_19.png")
+                    self.platforms.append(p)
+                    self.entities.add(p)
+                if col == "6":
+                    p = Platform(x, y, "platform/jungle_pack_21.png")
+                    self.platforms.append(p)
+                    self.entities.add(p)
+                if col == "7":
+                    p = Platform(x, y, "platform/jungle_pack_40.png")
                     self.platforms.append(p)
                     self.entities.add(p)
                 if col == "E":
@@ -47,27 +76,57 @@ class Level():
                     self.entities.add(e)
                 if col == "Q":
                     q = EnemyMosquito(x, y)
+                    enemigo_test = q
                     self.enemies.append(q)
                     self.entities.add(q)
                 if col == "S":
                     s = EnemySpider(x, y)
                     self.enemies.append(s)
                     self.entities.add(s)
+
+                if col == "0":
+                    p = Platform(x, y, "platform/jungle_pack_09.png")
+                    self.platforms.append(p)
+                    self.entities.add(p)
+
+                if col == "D":
+                    d = Decoration(x, y, 128,128, "platform/jungle_pack_67.png")
+                    self.decorations.append(d)
+                    self.entities.add(d)
+
+                if col == "!":
+                    d = Decoration(x, y, 128,128, "platform/jungle_pack_59.png")
+                    self.decorations.append(d)
+                    self.entities.add(d)
+                if col == "¡":
+                    d = Decoration(x, y, 128,128, "platform/jungle_pack_57.png")
+                    self.decorations.append(d)
+                    self.entities.add(d)
+                if col == "B":
+                    d = Decoration(x, y, 128,128, "platform/jungle_pack_66.png")
+                    self.decorations.append(d)
+                    self.entities.add(d)
+
+                #player
                 if col == "F":
                     self.player = Player(x, y, player_settings[2])
                 x += 32
             y += 32
             x = 0
+        self.player.enemy_get=enemigo_test
         self.total_level_width  = len(level[0])*32
         self.total_level_height = len(level)*32
 
-        #self.player = Player(player_settings[0],player_settings[1],player_settings[2])
-
         self.camera = Camera(Camera.complex_camera, self.total_level_width, self.total_level_height)
         self.entities.add(self.player)
-        self.backGround = Background(PATH+'bg1.png', [0,0], (1280, 720))
 
-        self.playmusic(bg_music)
+        ENTITIES = self.entities
+
+        self.backGround = Background(PATH+'platform/bg_jungle.png', [0,0], (1280, 720))
+        try:
+            self.playmusic(bg_music)
+        except Exception:
+            print("no bg music")
     def update(self, up, down, left, right, space, running):
         # draw background
         for y in range(32):
@@ -78,7 +137,7 @@ class Level():
         self.screen.fill([255, 255, 255])
         self.screen.blit(self.backGround.image, self.backGround.rect)
         # update player, draw everything else
-        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.total_level_height):
+        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities, self.total_level_height):
             return False
         for e in self.entities:
             self.screen.blit(e.image, self.camera.apply(e))
@@ -103,11 +162,10 @@ class Media_Screen():
         waiting = True
         while waiting:
             self.timer.tick(60)
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    waiting = False
                     self.running = False
+                    waiting = False
                 if event.type == pygame.KEYUP:
                     waiting = False
 
@@ -120,7 +178,7 @@ class Media_Screen():
 
 class Start_Screen(Media_Screen):
     def __init__(self, timer):
-        Media_Screen.__init__(self, timer,(Background(PATH+'bg1.png', [0,0], (1280, 720))))
+        Media_Screen.__init__(self, timer,(Background(PATH+'platform/bg_jungle.png', [0,0], (1280, 720))))
         self.screen=pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
         self.show_start_screen()
     def show_start_screen(self):
@@ -128,59 +186,179 @@ class Start_Screen(Media_Screen):
         image = pygame.image.load(PATH+"logo.png")
         image = pygame.transform.scale(image,(550,200))
         image_width, image_height= image.get_size()
-        #self.screen.fill("#0033FF")
         self.screen.blit(image,((WIN_WIDTH-image_width)/2,(WIN_HEIGHT-image_height)/3))
         self.draw_text("PRESS ANY KEY",32,(240,248,255),WIN_WIDTH/2,WIN_HEIGHT*3 /4)
         pygame.display.flip()
+        self.running = True
         self.wait_for_key()
-
+        if not self.running:
+            pygame.quit()
+            sys.exit()
 def main():
     global cameraX, cameraY
     pygame.init()
-    
+
     pygame.display.set_caption("Froggy!")
     timer = pygame.time.Clock()
 
     screen=Start_Screen(timer)
 
     up = down = left = right = space = running = False
-    level = [
-        "PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",
-        "P                                                                                    P",
-        "P                                                                                     ",
-        "P                                                                                     ",
-        "P                                                PPPPPPPPPPP                         P",
-        "P                    PPPPPP                                             PPPPPP       P",
-        "P                                                                                    P",
-        "P                                                                                    P",
-        "P    PPPPPPPP                                                                        P",
-        "P                             S                                                      P",
-        "P                          PPPPPPP              Q            PPPPPP                  P",
-        "P                                                                                    P",
-        "P                                                                                    P",
-        "P                                                                     PPPPPPP        P",
-        "P                                                                                    P",
-        "P                                     PPPPPP                                         P",
-        "P                                                                                    P",
-        "P    F                                            PPPPPPPPPPP                        P",
-        "P                                                                                    P",
-        "P                 22222222222                                                        P",
-        "P                                                                                    P",
-        "P                                                                                    P",
-        "P                                                                                    P",
-        "P                                                               Q                    E",
-        "PPPPPPPPPPPPPPPPPPPPPPPPPPP   PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP",]
+    #para cambiar niveles cambiar el nombre a level (no duplicados)
+    level = [# level de testeo
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                             Q                               ",
+        "              2    2  22222 2      222      22  22 2   2 22  2 222  2222                                       3PPP1         ",
+        "              2    2  2   2 2     22 22     222222 2   2 222 2 2  2 2  2                                       22222         ",
+        "              222222  2   2 2     2   2     2 22 2 2   2 2 2 2 2  2 2  2                      D                22222         ",
+        "              2    2  2   2 2     22222     2    2 2   2 2 2 2 2  2 2  2                   3PPPPPPP1           22222         ",
+        "              2    2  22222 22222 2   2     2    2 22222 2  22 222  2222                   222222222           22222PPPPPPPPP",
+        "                                                                                           222222222           22222222222222",
+        "                                                                                      B    222222222           22222222222222",
+        "               PPPPPPPPP                                                      S    3PPPPPPP222222222           22222222222222",
+        "               2       2                                                  3PPPPPPPP22222222222222222           22222222222222",
+        "               2  Q    2                                              !   22222222222222222222222222           22222222222222",
+        "               2       2                             B               3PPPP22222222222222222222222222           22222222222222",
+        "          P     PPPPPPP       PP                5PPPPPP7          0PP2222222222222222222222222222222           22222222222222",
+        "                                        B        666666             66662222222222222222222222222222           22222222222222",
+        "                                      PPPPPP                            6666222222222222222222222222           22222222222222",
+        "        P                             622226                                662222222222222222222222           22222222222222",
+        "                                       6666                                   6666666666666222222222           22222222222222",
+        "                                                                                           222222222           22222222222222",
+        "    ¡  F     !                S P  S  PB      D     ¡                   D                  222222222           22222222222222",
+        "PPPPPPPPPPPPPPPPPP1          3PP2PPPPP2PPPPPPPPPPPPPPP1        P     3PPPPPPPPPPPPPPPPPPPP2222222222           22222222222222"]
+    #levels
+    level1 = [
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                             Q                               ",
+        "                                                                                                               3PPP1         ",
+        "                                                                                                               22222         ",
+        "                                                                                              D                22222         ",
+        "                                                                                           3PPPPPPP1           22222         ",
+        "                                                                                           222222222           22222PPPPPPPPP",
+        "                                                                                           222222222           22222222222222",
+        "                                                                                      B    222222222           22222222222222",
+        "                                                                              S    3PPPPPPP222222222           22222222222222",
+        "                                                                          3PPPPPPPP22222222222222222           22222222222222",
+        "                                                                      !   22222222222222222222222222           22222222222222",
+        "                                                   B                 3PPPP22222222222222222222222222           22222222222222",
+        "                                                5PPPPPP7          0PP2222222222222222222222222222222           22222222222222",
+        "                                        B        666666             66662222222222222222222222222222           22222222222222",
+        "                                      PPPPPP                            6666222222222222222222222222           22222222222222",
+        "                                      622226                                662222222222222222222222           22222222222222",
+        "                                       6666                                   6666666666666222222222           22222222222222",
+        "                                                                                           222222222           22222222222222",
+        "    ¡  F     !                   B          D     ¡                     D                  222222222           22222222222222",
+        "PPPPPPPPPPPPPPPPPP1         3PPPPPPPPPPPPPPPPPPPPPPPP1         P     3PPPPPPPPPPPPPPPPPPPP2222222222           22222222222222"]
+
+    level2= [
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                            B                                  B                                             ",
+        "                                3PPPPPPPPPPPPPPPPPPPP1                3PPPPPPPPPPPPPPPPPPPP1                                 ",
+        "                                6666666222222222222222                2222222222222222666666                                 ",
+        "                      PPP              666666666666666                6666666666666666            PPP                        ",
+        "                      666                                                                         666                        ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                 PPP                                                                                  PPP                    ",
+        "                 666                                                                                  666                    ",
+        "  F!                                 B                        B                  D                                   ¡       ",
+        "PPPPPPPPPPPP1                  3PPPPPPPPPPP1        3PPPPPPPPPPPPPPPPP1        3PPPPPPPPPPP1                    3PPPPPPPPPPPP",
+        "2222222266666                  6666662222222        2222222222222222222        2222222266666                    6666622222222",
+        "22226666             PPP             6666666        6666666666666666666        66666666         PPP                  22222222",
+        "6666                 666                                                                        666                  22222222",
+        "                                                                                                                     22222222",
+        "                                                                                                                     22222222",
+        "              PPP                                                                                      PPP           22222222",
+        "              666                                                                                      666           22222222",
+        "                                                                                                                     22222222",
+        "                          B                                                                   B                      22222222",
+        "                       3PPPPP1                  B                                            3PPPPP1                 22222222",
+        "                       6666662PPPPPPP1      3PPPPPP1        3PPP1      3PPPPPP1        PPPPPP2666666                 22222222"]
+
+
+
+    level3 = [
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             "]
+
+
+
+
+    level_vacio = [
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             ",
+        "                                                                                                                             "]
+
+
+
     player_settings = (32, 32,PATH+ "froggy.png")
+
+
     level = Level(level, player_settings, PATH+'bg_music1.ogg')
-    
+
 
     done = play_again = False
     while not (done or play_again):
         timer.tick(60)
 
-       
+
         for e in pygame.event.get():
-            if e.type == QUIT: 
+            if e.type == QUIT:
                 done = True
             if e.type == KEYDOWN and e.key == K_ESCAPE:
                 paused = True#change for paused menu
@@ -197,7 +375,7 @@ def main():
             if e.type == KEYDOWN and e.key == K_RIGHT:
                 right = True
             if e.type == KEYDOWN and e.key == K_SPACE:
-                running = True
+                space = True
             if e.type == KEYUP and e.key == K_UP:
                 up = False
             if e.type == KEYUP and e.key == K_DOWN:
@@ -259,45 +437,41 @@ class Entity(pygame.sprite.Sprite):
 class EnemyMosquito(Entity):
     def __init__(self, x, y):
         Entity.__init__(self)
+        self.vida=3
         self.xvel = 4.0
         self.yvel = 4.0
-
+        self.follow = False
         self.onGround = False
         self._image_origin = pygame.image.load(PATH + "mosquito1.png")
-        self._image_origin = pygame.transform.scale(self._image_origin, (32, 32))
-        self._image_toLeft = pygame.transform.flip(self._image_origin, True, False)
-        self.image  = self._image_origin
+        self._image_origin = pygame.transform.scale(self._image_origin, (32, 32)).convert_alpha()
+        self._image_toLeft = pygame.transform.flip(self._image_origin, True, False).convert_alpha()
+        self.image = self._image_origin
         image_rect = (self.image.get_rect().size)
         self.image.convert()
         self.rect = Rect(x, y, image_rect[0], image_rect[1])
-    def update(self, platforms, posX, posY):
-        # increment in x direction
-        #self.rect.left += self.xvel
-        # do x-axis collisions
-        self.xvel = 4.0
-        self.yvel = 4.0
+        self.disparado = False
+    def update(self, platforms, enemies, entities, posX, posY):
+        if(not self.disparado):
+            self.xvel = 4.0
+            self.yvel = 4.0
+            self.move_towards_player(posX, posY)
+            self.collide(self.xvel, 0, platforms)
+            self.collide(0, self.yvel, platforms)
+        else:
+            self.rect.x += self.xvel
+            self.collide_anything(platforms, enemies, entities)
 
-        self.move_towards_player(posX, posY)
-
-        self.collide(self.xvel, 0, platforms)
-        # increment in y direction
-        #self.rect.top += self.yvel
-        # assuming we're in the air
-        #self.onGround = False;
-        # do y-axis collisio ns
-        self.collide(0, self.yvel, platforms)
-
-
-        a = Surface((32, 32))
-        a.convert()
-        a.fill(Color("#d8c217")) # change for image
-        b = Rect(32, 32, 32, 32)
     def move_towards_player(self, posX, posY):
         # find normalized direction vector (dx, dy) between enemy and player
         dx, dy = self.rect.x - posX, self.rect.y - posY
-        dist = math.hypot(dx, dy) #math.sqrt(dx*dx + dy*dy) 
+        dist = math.hypot(dx, dy) #math.sqrt(dx*dx + dy*dy)
+        if not self.follow:
+            if dist < 400:
+                self.follow = True
+            else:
+                return
         try:
-            dx, dy =  dx*-1.0 / dist, dy*-1.0 / dist
+            dx, dy = dx * -1.0 / dist, dy * -1.0 / dist
         except ZeroDivisionError:
             print("Divided by zero")
         # move along this normalized vector towards the player at current speed
@@ -308,137 +482,264 @@ class EnemyMosquito(Entity):
             self.image = self._image_toLeft
         else:
             self.image = self._image_origin
-    def observar(self, posX, posY, platforms):
-        self.update(platforms, posX, posY)
+
+    def observar(self, posX, posY, platforms, enemies, entities):
+        self.update(platforms, enemies, entities, posX, posY)
+
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
             if pygame.sprite.collide_rect(self, p):
-                if abs(self.rect.right - p.rect.left) < 5:
+                if abs(self.rect.right - p.rect.left) < abs(self.xvel) + 1:
                     self.rect.right = p.rect.left
                     self.xvel = 0
-                    print ("Enemy collide right")
-                if abs(self.rect.left - p.rect.right) < 5:
+                    print("Enemy collide right")
+                if abs(self.rect.left - p.rect.right) < abs(self.xvel) + 1:
                     self.rect.left = p.rect.right
                     self.xvel = 0
-                    print ("Enemy collide left")
-                if abs(self.rect.bottom - p.rect.top) < 5:
+                    print("Enemy collide left")
+                if abs(self.rect.bottom - p.rect.top) < abs(self.yvel) + 1:
                     self.rect.bottom = p.rect.top
                     self.yvel = 0
-                if abs(self.rect.top - p.rect.bottom) < 5:
+                if abs(self.rect.top - p.rect.bottom) < abs(self.yvel) + 1:
                     self.rect.top = p.rect.bottom
                     self.yvel = 0
-                    print ("Enemy collide top")
+                    print("Enemy collide top")
+
+    def salir_disparado(self, dir):
+        print("salidisparado")
+        self.disparado = True
+        if dir == 'derecha':
+            self.xvel = 12.0
+        else:
+            self.xvel = -12.0
+
+    def collide_anything(self, platforms, enemies, entities):
+        for p in platforms:
+            if pygame.sprite.collide_rect(self, p):
+                self.disparado = False
+                self.xvel = 0
+                if self.perdervida():
+                    enemies.remove(self)
+                    entities.remove(self)
+                    self = None
+                return
+        for e in enemies:
+            if e != self and pygame.sprite.collide_rect(self, e):
+                self.disparado = False
+                self.xvel = 0
+                if isinstance(e, EnemySpider):
+                    if e.perdervida():
+                        enemies.remove(e)
+                        entities.remove(e)
+                        e = None
+                if isinstance(e, EnemyMosquito):
+                    if e.perdervida():
+                        enemies.remove(e)
+                        entities.remove(e)
+                        e = None
+                if self.perdervida():
+                    enemies.remove(self)
+                    entities.remove(self)
+                    self = None
+                return
+
+    def perdervida(self):
+        self.vida = self.vida - 1
+        if self.vida < 1: #morir
+            return True
+        else:
+            False
 
 class EnemySpider(Entity):
     def __init__(self, x, y):
         Entity.__init__(self)
+        self.vida = 1
         self.xvel = 4.0
         self.yvel = 4.0
-
+        self.follow = False
         self.onGround = False
         self._image_origin = pygame.image.load(PATH + "spider1.png")
-        self._image_origin = pygame.transform.scale(self._image_origin, (32, 32))
-        self._image_toLeft = pygame.transform.flip(self._image_origin, True, False)
+        self._image_origin = pygame.transform.scale(self._image_origin, (32, 32)).convert_alpha()
+        self._image_toLeft = pygame.transform.flip(self._image_origin, True, False).convert_alpha()
         self.image  = self._image_origin
         image_rect = (self.image.get_rect().size)
         self.image.convert()
         self.rect = Rect(x, y, image_rect[0], image_rect[1])
     def update(self, platforms, posX, posY):
-        # increment in x direction
-        #self.rect.left += self.xvel
-        # do x-axis collisions
-        self.xvel = 7.0
+        self.xvel = 3.0
         self.yvel = 4.0
-
         self.move_towards_player(posX, posY)
-
         self.collide(self.xvel, 0, platforms)
-        # increment in y direction
-        #self.rect.top += self.yvel
-        # assuming we're in the air
-        #self.onGround = False;
-        # do y-axis collisio ns
         self.collide(0, self.yvel, platforms)
 
-
-        a = Surface((32, 32))
-        a.convert()
-        a.fill(Color("#d8c217")) # change for image
-        b = Rect(32, 32, 32, 32)
     def move_towards_player(self, posX, posY):
+        dist = math.hypot(self.rect.x - posX, self.rect.y - posY) #math.sqrt(dx*dx + dy*dy)
+        if not self.follow:
+            if dist < 200:
+                self.follow = True
+            else:
+                return
         dx = posX - self.rect.x
         self.rect.y += 4.0
-        if dx > 0:
-            self.image = self._image_toLeft
-            self.rect.x +=self.xvel
-        elif dx < 0:
-            self.image = self._image_origin
-            self.rect.x -=self.xvel
+        if abs(self.rect.x - posX)>3:
+            if dx > 0:
+                self.image = self._image_toLeft
+                self.rect.x +=self.xvel
+            elif dx < 0:
+                self.image = self._image_origin
+                self.rect.x -=self.xvel
 
     def observar(self, posX, posY, platforms):
         self.update(platforms, posX, posY)
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
             if pygame.sprite.collide_rect(self, p):
-                if abs(self.rect.right - p.rect.left) < 5:
+                if abs(self.rect.right - p.rect.left) < abs(self.xvel)+1 and self.overlap((self.rect.top, self.rect.bottom),(p.rect.top, p.rect.bottom)):
                     self.rect.right = p.rect.left
                     self.xvel = 0
                     print ("Enemy collide right")
-                if abs(self.rect.left - p.rect.right) < 5:
+                if abs(self.rect.left - p.rect.right) < abs(self.xvel)+1 and self.overlap((self.rect.top, self.rect.bottom),(p.rect.top, p.rect.bottom)):
                     self.rect.left = p.rect.right
                     self.xvel = 0
                     print ("Enemy collide left")
-                if abs(self.rect.bottom - p.rect.top) < 5:
+                if abs(self.rect.bottom - p.rect.top) < abs(self.yvel)+1:
                     self.rect.bottom = p.rect.top
                     self.yvel = 0
-                if abs(self.rect.top - p.rect.bottom) < 5:
+                if abs(self.rect.top - p.rect.bottom) < abs(self.yvel)+1:
                     self.rect.top = p.rect.bottom
                     self.yvel = 0
                     print ("Enemy collide top")
+    def overlap(self, t1,t2):
+        return t1[0]<=t2[1] and t2[0]<=t1[0]
+    def perdervida(self):
+        self.vida=self.vida-1
+        if self.vida<1:
+            #morir
+            return True
+        else:
+            False
 
 class Player(Entity):
     def __init__(self, x, y, image_path):
         Entity.__init__(self)
+        self.counter=0
+        self.counter_lengua=0
         self.xvel = 0
         self.yvel = 0
         self.onGround = False
-        #self.image = Surface((32,32))
-        self._image_origin = pygame.image.load(image_path)
-        self._image_toLeft = pygame.transform.flip(self._image_origin, True, False)
+
+        self._image_origin = pygame.image.load(PATH +"sprite_froggy0.png")
+        self._image_origin = pygame.transform.scale(self._image_origin, (52, 52)).convert_alpha()
+        self._image_toLeft = pygame.transform.flip(self._image_origin, True, False).convert_alpha()
         self.image  = self._image_origin
-        #self.image.fill(Color("#0000FF"))
+
         image_rect = (self.image.get_rect().size)
-        self.image.convert()
         self.rect = Rect(x, y, image_rect[0], image_rect[1])
         self.tongue = 0
 
-    def update(self, up, down, left, right, space, running, platforms, enemies, level_high):
+        self.enemy_get = None
+
+
+        #todas las demas imagenes
+        path_tongue = "froggy_tongue/"
+        path_walk = "froggy_walk/"
+
+        self.imagenes_derecha = []
+        self.imagenes_izquierda = []
+
+        self.imagenes_walk_derecha = []
+        self.imagenes_walk_izquierda = []
+
+        self.imagenes_derecha.append(self._image_origin)
+        self.imagenes_izquierda.append(self._image_toLeft)
+        for i in range(4):# lengua
+            i=i+1
+            im = pygame.image.load(PATH+ path_tongue+"froggy_tongue_"+str(i)+".png")
+            im = pygame.transform.scale(im, (52, 52)).convert_alpha()
+            self.imagenes_derecha.append(im)
+            im_toLeft = pygame.transform.flip(im, True, False).convert_alpha()
+            self.imagenes_izquierda.append(im_toLeft)
+
+        self.imagenes_walk_derecha.append(self._image_origin)
+        self.imagenes_walk_izquierda.append(self._image_toLeft)
+        for i in range(2): #walk
+            i=i+1
+            im = pygame.image.load(PATH+ path_walk+"sprite_froggy"+str(i)+".png")
+            im = pygame.transform.scale(im, (52, 52)).convert_alpha()
+            self.imagenes_walk_derecha.append(im)
+            im_toLeft = pygame.transform.flip(im, True, False).convert_alpha()
+            self.imagenes_walk_izquierda.append(im_toLeft)
+
+
+        self.lado = 'derecha'
+        self.animacion = Animacion()
+
+
+        ################
+        self.forma = [0, 'ida']
+
+        self.forma_walk = [0, 'ida']
+        self.sacandolengua=False
+    def update(self, up, down, left, right, space, running, platforms, enemies, entities, level_high):
         vida = True
         if up:
             # only jump if on the ground
-            if self.onGround: self.yvel -= 10
+            if self.onGround:
+                self.yvel -= 9
+                try:
+                    jumpsound= pygame.mixer.Sound(PATH+'sounds/Froggy_Jump.wav')
+                    jumpsound.play()
+                except Exception:
+                    print("no audio")
         if down:
             pass
         #if running:
             #self.xvel = 12
         if left:
-            self.xvel = -8
-            self.image = self._image_toLeft
+            self.xvel = -6.3
+            self.lado = 'izquierda'
         if right:
-            self.xvel = 8
-            self.image = self._image_origin
+            self.xvel = 6.3
+            self.lado = 'derecha'
         if space:
+            self.enemy_get.rect.x=self.rect.x
+            self.enemy_get.rect.y=self.rect.y+12
+            self.enemy_get.salir_disparado(self.lado)
             if self.tongue <= 0:
-                self.tongue = 20
+                self.tongue = 100
+        #print(self.tongue)
+        #self.enemy_get.update(platforms, 0, 0)
+        #self.screen.blit(self.enemy_get.image, ())
+
+        if space and self.sacandolengua==False:
+            self.sacandolengua = True
+
+        if self.sacandolengua == True:
+	        #cambiar imagen
+	        self.sacarlengua(self.lado)
+
         if not self.onGround:
             # only accelerate with gravity if in the air
             self.yvel += 0.3
             # max falling speed
-            if self.yvel > 100: self.yvel = 100
+            if self.yvel > 100:
+            	self.yvel = 100
         if not(left or right):
             self.xvel = 0
-        if (self.tongue>=0):
-            self.tongue-=1
+            self.forma_walk = [0, 'ida']
+            if self.sacandolengua == False:
+            	if self.lado == 'izquierda':
+	                self.image = self.imagenes_walk_izquierda[self.forma_walk[0]]
+            	else:
+	                self.image = self.imagenes_walk_derecha[self.forma_walk[0]]
+        elif self.sacandolengua == False:
+            self.walkloop(self.lado)
+            if self.lado == 'izquierda':
+                self.image = self.imagenes_walk_izquierda[self.forma_walk[0]]
+            else:
+                self.image = self.imagenes_walk_derecha[self.forma_walk[0]]
+        if (self.tongue >= 0):
+            self.tongue -= 1
         # increment in x direction
         self.rect.left += self.xvel
         # do x-axis collisions
@@ -450,16 +751,40 @@ class Player(Entity):
         # do y-axis collisions
         self.collide(0, self.yvel, platforms)
         vida = self.collide_enemies(enemies)
-        self.beobserver(enemies, platforms)
-        
-        a = Surface((32, 32))
-        a.convert()
-        a.fill(Color("#d8c217")) # change for image
-        b = Rect(32, 32, 32, 32)
-        if(self.rect.y>level_high or (vida)):
+        self.beobserver(enemies, platforms, entities)
+
+        if(self.rect.y > level_high or (vida)):
             return False
         else:
             return True
+
+    def sacarlengua(self, dir):
+        self.counter_lengua = self.counter_lengua + 1
+        if self.counter_lengua > 80:
+            self.counter_lengua = 0
+            self.sacandolengua = False
+            self.forma = [0, 'ida']
+        elif self.counter_lengua % 10 == 0:
+            print(self.counter_lengua)
+            if dir == 'derecha':
+                self.forma = self.animacion.animarCompleta(self.imagenes_derecha, self.forma)
+                self.image = self.imagenes_derecha[self.forma[0]]
+            else:
+                self.forma = self.animacion.animarCompleta(self.imagenes_izquierda, self.forma)
+                self.image = self.imagenes_izquierda[self.forma[0]]
+
+    def walkloop(self, dir):
+        self.counter = self.counter + 1
+        if self.counter > 50:
+            self.counter = 0
+        elif self.counter % 10 == 0:
+            print(self.counter)
+            if dir == 'derecha':
+                self.forma_walk = self.animacion.animarCompleta(self.imagenes_walk_derecha, self.forma_walk)
+                self.image = self.imagenes_walk_derecha[self.forma_walk[0]]
+            else:
+                self.forma_walk = self.animacion.animarCompleta(self.imagenes_walk_izquierda, self.forma_walk)
+                self.image = self.imagenes_walk_izquierda[self.forma_walk[0]]
 
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
@@ -468,10 +793,10 @@ class Player(Entity):
                     pygame.event.post(pygame.event.Event(QUIT))
                 if xvel > 0:
                     self.rect.right = p.rect.left
-                    print ("collide right")
+                    print("collide right")
                 if xvel < 0:
                     self.rect.left = p.rect.right
-                    print ("collide left")
+                    print("collide left")
                 if yvel > 0:
                     self.rect.bottom = p.rect.top
                     self.onGround = True
@@ -479,39 +804,114 @@ class Player(Entity):
                 if yvel < 0:
                     self.rect.top = p.rect.bottom
                     self.yvel = 0
-                    print ("collide top")
+                    print("collide top")
 
     def collide_enemies(self, enemies):
         for e in enemies:
             if pygame.sprite.collide_rect(self, e):
+                if isinstance(e, EnemyMosquito):
+                    if e.disparado:
+                        return False
                 print("--------CHOCA------")
                 return True
-                #pygame.event.post(pygame.event.Event(QUIT))
         return False
-    def beobserver(self, enemies, platforms):
+
+    def beobserver(self, enemies, platforms, entities):
         for q in enemies:
-            #if isinstance(q, Enemy):
-            q.observar(self.rect.x, self.rect.y, platforms)
+            if isinstance(q, EnemyMosquito):
+                q.observar(self.rect.x, self.rect.y, platforms, enemies, entities)
+            else:
+                q.observar(self.rect.x, self.rect.y, platforms)
+
+
+def crop(image_name, rx, ry):
+        pil_image = Image.open(image_name)
+        size = (pil_image.width, pil_image.height)
+        np_array = numpy.array(pil_image)
+        blank_px = [255, 255, 255, 0]
+        mask = np_array != blank_px
+        coords = numpy.argwhere(mask)
+        try:
+            x0, y0, z0 = coords.min(axis=0)
+            x1, y1, z1 = coords.max(axis=0) + 1
+            cropped_box = np_array[x0:x1, y0:y1, z0:z1]
+            pil_image = Image.fromarray(cropped_box, 'RGBA')
+        except Exception:
+            pass
+        print(image_name + str((pil_image.width, pil_image.height)))
+        return (pil_image.width * rx / size[0], pil_image.height * ry / size[1])
 
 
 class Platform(Entity):
     def __init__(self, x, y, image_path):
         Entity.__init__(self)
 
-        self._image_origin = pygame.image.load(PATH + image_path)
-        self._image_origin = pygame.transform.scale(self._image_origin, (32, 32))
-        self.image  = self._image_origin
-        image_rect = self.image.get_rect().size
-        self.image.convert()
+        image_rect = None
+        try:
+            image_rect = IMAGE_SIZES[PATH + image_path]
+            self.image = IMAGES[(PATH + image_path, 32, 32)]
+        except KeyError:
+            image_rect = crop(PATH + image_path, 32, 32)
+            IMAGE_SIZES[PATH + image_path] = image_rect
+            if (PATH + image_path, 32, 32) not in IMAGES:
+                self.image = pygame.image.load(PATH + image_path)
+                self.image = pygame.transform.scale(self.image, (32, 32)).convert_alpha()
+                IMAGES[(PATH + image_path, 32, 32)] = self.image
         self.rect = Rect(x, y, image_rect[0], image_rect[1])
 
     def update(self):
         pass
 
+
+class Decoration(Entity):
+    def __init__(self, x, y, w, h, image_path):
+        Entity.__init__(self)
+        self._image_origin = pygame.image.load(PATH + image_path)
+        self._image_origin = pygame.transform.scale(self._image_origin, (w, h))
+        self.image = self._image_origin
+        image_rect = None
+        try:
+            image_rect = IMAGE_SIZES[PATH + image_path]
+        except KeyError:
+            image_rect = crop(PATH + image_path, w, h)
+            IMAGE_SIZES[PATH + image_path] = image_rect
+        self.rect = Rect(x, y - h + 32, image_rect[0], image_rect[1])
+
+    def update(self):
+        pass
+
+
 class ExitBlock(Platform):
     def __init__(self, x, y):
         Platform.__init__(self, x, y, "platform/18.png")
-        self.image.fill(Color("#0033FF"))
+
+
+class Animacion:
+    def __init__(self):
+        pass
+
+    def animarCompleta(self, imagenes, forma):
+        # es +1 ya que en la ultima posicion va a ir si es ida o vuelta
+        if forma[0] + 1 == len(imagenes):
+            forma[1] = 'vuelta'
+        # se verifica si esta en la ida o vuelta
+        if forma[1] == 'ida':
+            forma[0] = forma[0] + 1
+        elif forma[1] == 'vuelta':
+            forma[0] = forma[0] - 1
+            if forma[0] == 0:
+                forma[1] = 'ida'
+        return forma
+
+    def animarIda(self, imagenes, i):
+
+        # es +1 ya que aca no hay ida o vuelta
+        if i + 1 == len(imagenes):
+            i = 0
+        else:
+            i = i + 1
+        return i
+
 
 if __name__ == "__main__":
     main()
