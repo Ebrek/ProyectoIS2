@@ -654,7 +654,7 @@ class EnemyMosquito(Entity):
             self.image = self._image_origin
 
     def observar(self, posX, posY, platforms, enemies, entities,  level_width, level_high):
-        #self.update(platforms, enemies, entities, posX, posY, level_width, level_high)
+        self.update(platforms, enemies, entities, posX, posY, level_width, level_high)
         pass
 
     def collide(self, xvel, yvel, platforms):
@@ -886,7 +886,7 @@ class Player(Entity):
                     print('xxxxxxxxxxxxxxxxxx')
                     entities.add(self.enemy_get)
                     self.enemy_get.rect.x=self.rect.x
-                    self.enemy_get.rect.y=self.rect.y+12
+                    self.enemy_get.rect.y=self.rect.y
                     self.enemy_get.salir_disparado(self.lado)
                     self.espera = 0
                     self.agarrado = False
@@ -948,11 +948,11 @@ class Player(Entity):
 
     def sacarlengua(self, dir):
         self.counter_lengua = self.counter_lengua + 1
-        if self.counter_lengua > 80:
+        if self.counter_lengua > 40:
             self.counter_lengua = 0
             self.sacandolengua = False
             self.forma = [0, 'ida']
-        elif self.counter_lengua % 10 == 0:
+        elif self.counter_lengua % 5 == 0:
             print(self.counter_lengua)
             if dir == 'derecha':
                 self.forma = self.animacion.animarCompleta(self.imagenes_derecha, self.forma)
@@ -1015,10 +1015,10 @@ class Player(Entity):
                     
             # este es para que el enemigo tragado no le haga perder vida
             if e == self.enemy_get:
-                return False
+                pass
             
             # aca es para todos los demas enemigos
-            if pygame.sprite.collide_rect(self, e):
+            elif pygame.sprite.collide_rect(self, e):
                 return True
         return False
     def beobserver(self, enemies, platforms, entities, level_width, level_high):
