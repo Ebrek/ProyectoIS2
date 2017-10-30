@@ -98,6 +98,13 @@ class Level():
                     self.decorations.append(d)
                     self.entities.add(d)
 
+#monedas como decoraciones por ahora
+                    #GEMAS
+                if col == "G":
+                    g = Decoration(x, y, 16,16, "items/gem_9.png")
+                    self.decorations.append(g)
+                    self.entities.add(g)
+
                 if col == "!":
                     d = Decoration(x, y, 128,128, "platform/jungle_pack_59.png")
                     self.decorations.append(d)
@@ -296,7 +303,7 @@ class GameMenu():
             image = pygame.transform.scale(image,(450,200))
             image_width, image_height= image.get_size()
             self.screen.blit(image,((WIN_WIDTH-image_width)/2,(WIN_HEIGHT-image_height)/3))
-            
+
 
             for item in self.items:
                 if self.mouse_is_visible:
@@ -304,8 +311,8 @@ class GameMenu():
                 self.screen.blit(item.label, item.position)
 
             pygame.display.flip()
-            
-            
+
+
 def iniciar(param):
     param.mainloop=False
     print(param.mainloop)
@@ -369,30 +376,30 @@ def main():
 
     up = down = left = right = space = running = False
     #para cambiar niveles cambiar el nombre a level (no duplicados)
-    level = [# level de testeo
+    level2 = [# level de testeo
         "                                                                                                                             ",
         "                                                                                                                             ",
         "                                                                                                                             ",
         "                                                                                                                             ",
-        "                                                                                             Q                               ",
+        "                                                                                             Q                   G           ",
         "              2    2  22222 2      222      22  22 2   2 22  2 222  2222                                       3PPP1         ",
-        "              2    2  2   2 2     22 22     222222 2   2 222 2 2  2 2  2                                       22222         ",
-        "              222222  2   2 2     2   2     2 22 2 2   2 2 2 2 2  2 2  2                      D                22222         ",
-        "              2    2  2   2 2     22222     2    2 2   2 2 2 2 2  2 2  2                   3PPPPPPP1           22222         ",
+        "              2    2  2   2 2     22 22     222222 2   2 222 2 2  2 2  2                                PPP    22222         ",
+        "              222222  2   2 2     2   2     2 22 2 2   2 2 2 2 2  2 2  2                      D  GG            22222         ",
+        "              2    2  2   2 2     22222     2    2 2   2 2 2 2 2  2 2  2                   3PPPPPPP1           22222        E",
         "              2    2  22222 22222 2   2     2    2 22222 2  22 222  2222                   222222222           22222PPPPPPPPP",
         "                                                                                           222222222           22222222222222",
-        "                                                                                      B    222222222           22222222222222",
+        "                  GGG                                                                 B    222222222           22222222222222",
         "               PPPPPPPPP                                                      S    3PPPPPPP222222222           22222222222222",
         "               2       2                                                  3PPPPPPPP22222222222222222           22222222222222",
         "               2  Q    2                                              !   22222222222222222222222222           22222222222222",
         "               2       2                             B               3PPPP22222222222222222222222222           22222222222222",
         "          P     PPPPPPP       PP                5PPPPPP7          0PP2222222222222222222222222222222           22222222222222",
-        "                                        B        666666             66662222222222222222222222222222           22222222222222",
+        "                                        B G      666666             66662222222222222222222222222222           22222222222222",
         "                                      PPPPPP                            6666222222222222222222222222           22222222222222",
         "        P                             622226                                662222222222222222222222           22222222222222",
         "                                       6666                                   6666666666666222222222           22222222222222",
-        "                                                                                           222222222           22222222222222",
-        "    ¡  F     !                S P  S  PB      D     ¡                   D                  222222222           22222222222222",
+        "                                                                               GGGGG       222222222           22222222222222",
+        "    ¡  F     !                S P  S  PB  GG  D     ¡                   D      GGGGG       222222222           22222222222222",
         "PPPPPPPPPPPPPPPPPP1          3PP2PPPPP2PPPPPPPPPPPPPPP1        P     3PPPPPPPPPPPPPPPPPPPP2222222222           22222222222222"]
     #levels
     level1 = [
@@ -400,7 +407,7 @@ def main():
         "                                                                                                                             ",
         "                                                                                                                             ",
         "                                                                                                                             ",
-        "                                                                                             Q                               ",
+        "                                                                                             Q                   GG          ",
         "                                                                                                               3PPP1         ",
         "                                                                                                               22222         ",
         "                                                                                              D                22222         ",
@@ -417,39 +424,39 @@ def main():
         "                                      PPPPPP                            6666222222222222222222222222           22222222222222",
         "                                      622226                                662222222222222222222222           22222222222222",
         "                                       6666                                   6666666666666222222222           22222222222222",
-        "                                                                                           222222222           22222222222222",
-        "    ¡  F     !                   B          D     ¡                     D                  222222222           22222222222222",
+        "                                                                                   GGGG    222222222           22222222222222",
+        "    ¡  F     !                   B    GGGG  D     ¡                     D          GGGG    222222222           22222222222222",
         "PPPPPPPPPPPPPPPPPP1         3PPPPPPPPPPPPPPPPPPPPPPPP1         P     3PPPPPPPPPPPPPPPPPPPP2222222222           22222222222222"]
 
-    level2= [
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                            B                                  B                                             ",
-        "                                3PPPPPPPPPPPPPPPPPPPP1                3PPPPPPPPPPPPPPPPPPPP1                                 ",
-        "                                6666666222222222222222                2222222222222222666666                                 ",
-        "                      PPP              666666666666666                6666666666666666            PPP                        ",
-        "                      666                                                                         666                        ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                 PPP                                                                                  PPP                    ",
-        "                 666                                                                                  666                    ",
-        "  F!                                 B                        B                  D                                   ¡       ",
-        "PPPPPPPPPPPP1                  3PPPPPPPPPPP1        3PPPPPPPPPPPPPPPPP1        3PPPPPPPPPPP1                    3PPPPPPPPPPPP",
-        "2222222266666                  6666662222222        2222222222222222222        2222222266666                    6666622222222",
-        "22226666             PPP             6666666        6666666666666666666        66666666         PPP                  22222222",
-        "6666                 666                                                                        666                  22222222",
-        "                                                                                                                     22222222",
-        "                                                                                                                     22222222",
-        "              PPP                                                                                      PPP           22222222",
-        "              666                                                                                      666           22222222",
-        "                                                                                                                     22222222",
-        "                          B                                                                   B                      22222222",
-        "                       3PPPPP1                  B                                            3PPPPP1                 22222222",
-        "                       6666662PPPPPPP1      3PPPPPP1        3PPP1      3PPPPPP1        PPPPPP2666666                 22222222"]
+    level= [
+        "                                                                                                                              ",
+        "                                                                                                                              ",
+        "                                                              G                                                               ",
+        "                                     Q                   G       G                 Q                                          ",
+        "                                                        G            G                                                        ",
+        "                                                                                                                              ",
+        "                                            B  S                             S B                                              ",
+        "                                3PPPPPPPPPPPPPPPPPPPP1                3PPPPPPPPPPPPPPPPPPPP1                                  ",
+        "                       G        6666666222222222222222                2222222222222222666666                                  ",
+        "                      PPP              666666666666666                6666666666666666            PPP                         ",
+        "                      666                                                                         666                         ",
+        "                                   Q                         Q                         Q                                      ",
+        "                  G                                                                                                           ",
+        "           GG    PPP                           GG                         GG                          PPP                     ",
+        "                 666                                                                                  666                     ",
+        "  F!                             GG  B  GG            GGG   B  S  GGG           D   S GG                             ¡       ",
+        "PPPPPPPPPPPP1                  3PPPPPPPPPPP1        3PPPPPPPPPPPPPPPPP1        3PPPPPPPPPPP1                     3PPPPPPPPPPPP",
+        "2222222266666        GGG       6666662222222        2222222222222222222        2222222266666                     6666622222222",
+        "22226666             PPP             6666666        6666666666666666666        66666666         PPP                   22222222",
+        "6666                 666                                                                        666                   22222222",
+        "                                                                                                                      22222222",
+        "                                                  Q                                                                   22222222",
+        "              PPP                                                                                       PPP           22222222",
+        "              666                                                                                       666           22222222",
+        "                                        GG            GG            GG              GG                                22222222",
+        "                          B                                                                    B                      22222222",
+        "                       3PPPPP1  S              B              GG          GG              S   3PPPPP1                 22222222",
+        "                       6666662PPPPPPP1      3PPPPPP1        3PPP1      3PPPPPP1         PPPPPP2666666                 22222222"]
 
 
 
@@ -601,7 +608,7 @@ class Entity(pygame.sprite.Sprite):
 class EnemyMosquito(Entity):
     def __init__(self, x, y):
         Entity.__init__(self)
-        self.vida=2
+        self.vida=1
         self.xvel = 4.0
         self.yvel = 4.0
         self.follow = False
@@ -873,7 +880,7 @@ class Player(Entity):
         if self.sacandolengua == True:
 	        #cambiar imagen
 	        self.sacarlengua(self.lado)
-	        if abs(self.xvel) > 0.2: 
+	        if abs(self.xvel) > 0.2:
 	        	self.xvel =  self.xvel - numpy.sign(self.xvel)*0.1
 	        else:
 	        	self.xvel = 0
