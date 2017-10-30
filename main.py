@@ -11,6 +11,7 @@ HALF_WIDTH = int(WIN_WIDTH / 2)
 HALF_HEIGHT = int(WIN_HEIGHT / 2)
 
 WHITE = (255, 255, 255)
+OLIVE = (107, 142, 35)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 
@@ -210,7 +211,7 @@ class GameMenu():
             # t_h: total height of text block
             t_h = len(items) * menu_item.height
             pos_x = (self.scr_width / 2) - (menu_item.width / 2)
-            pos_y = (self.scr_height / 2) - (t_h / 2) + ((index*2) + index * menu_item.height)
+            pos_y = (self.scr_height / 1.25) - (t_h / 1.25) + ((index*1.25) + index * menu_item.height)
 
             menu_item.set_position(pos_x, pos_y)
             self.items.append(menu_item)
@@ -251,7 +252,7 @@ class GameMenu():
                 self.cur_item = 0
 
         self.items[self.cur_item].set_italic(True)
-        self.items[self.cur_item].set_font_color(RED)
+        self.items[self.cur_item].set_font_color(OLIVE)
 
         # Finally check if Enter or Space is pressed
         if key == pygame.K_SPACE or key == pygame.K_RETURN:
@@ -261,7 +262,7 @@ class GameMenu():
     def set_mouse_selection(self, item, mposx, mposy):
         """Marks the MenuItem the mouse cursor hovers on."""
         if item.is_mouse_selection(mposx, mposy):
-            item.set_font_color(RED)
+            item.set_font_color(OLIVE)
             item.set_italic(True)
         else:
             item.set_font_color(WHITE)
@@ -299,7 +300,7 @@ class GameMenu():
             image = pygame.image.load(PATH+"logo.png")
             image = pygame.transform.scale(image,(450,200))
             image_width, image_height= image.get_size()
-            self.screen.blit(image,((WIN_WIDTH-image_width)/2,(WIN_HEIGHT-image_height)/3))
+            self.screen.blit(image,((WIN_WIDTH-image_width)/3,(WIN_HEIGHT-image_height)/6))
 
 
             for item in self.items:
@@ -331,7 +332,7 @@ class Media_Screen():
                     waiting = False
 
     def draw_text(self,text,size,color,x,y):
-        font = pygame.font.Font('freesansbold.ttf',size)
+        font = pygame.font.Font("freesansbold.ttf", size)
         text_surface = font.render(text,True,color)
         text_rect = text_surface.get_rect()
         text_rect.midtop = (x,y)
