@@ -37,7 +37,6 @@ class Level():
         self.level = level
         # build the level
 
-        enemigo_test = None
         for row in level:
             for col in row:
                 if col == "1":
@@ -80,7 +79,6 @@ class Level():
                     self.entities.add(e)
                 if col == "Q":
                     q = EnemyMosquito(x, y)
-                    enemigo_test = q
                     self.enemies.append(q)
                     self.entities.add(q)
                 if col == "S":
@@ -124,7 +122,6 @@ class Level():
                 x += 32
             y += 32
             x = 0
-        self.player.enemy_get=enemigo_test
         self.total_level_width  = len(level[0])*32
         self.total_level_height = len(level)*32
 
@@ -376,7 +373,7 @@ def main():
 
     up = down = left = right = space = running = False
     #para cambiar niveles cambiar el nombre a level (no duplicados)
-    level2 = [# level de testeo
+    level = [# level de testeo
         "                                                                                                                             ",
         "                                                                                                                             ",
         "                                                                                                                             ",
@@ -399,7 +396,7 @@ def main():
         "        P                             622226                                662222222222222222222222           22222222222222",
         "                                       6666                                   6666666666666222222222           22222222222222",
         "                                                                               GGGGG       222222222           22222222222222",
-        "    ¡  F     !                S P  S  PB  GG  D     ¡                   D      GGGGG       222222222           22222222222222",
+        "    ¡  F     !  Q             S P  S  PB  GG  D     ¡                   D      GGGGG       222222222           22222222222222",
         "PPPPPPPPPPPPPPPPPP1          3PP2PPPPP2PPPPPPPPPPPPPPP1        P     3PPPPPPPPPPPPPPPPPPPP2222222222           22222222222222"]
     #levels
     level1 = [
@@ -428,7 +425,7 @@ def main():
         "    ¡  F     !                   B    GGGG  D     ¡                     D          GGGG    222222222           22222222222222",
         "PPPPPPPPPPPPPPPPPP1         3PPPPPPPPPPPPPPPPPPPPPPPP1         P     3PPPPPPPPPPPPPPPPPPPP2222222222           22222222222222"]
 
-    level= [
+    level3= [
         "                                                                                                                              ",
         "                                                                                                                              ",
         "                                                              G                                                               ",
@@ -656,7 +653,8 @@ class EnemyMosquito(Entity):
             self.image = self._image_origin
 
     def observar(self, posX, posY, platforms, enemies, entities,  level_width, level_high):
-        self.update(platforms, enemies, entities, posX, posY, level_width, level_high)
+        #self.update(platforms, enemies, entities, posX, posY, level_width, level_high)
+        pass
 
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
@@ -834,7 +832,8 @@ class Player(Entity):
 
         self.lado = 'derecha'
         self.animacion = Animacion()
-
+        self.agarrado = False
+        self.espera = 0
 
         ################
         self.forma = [0, 'ida']
@@ -863,17 +862,38 @@ class Player(Entity):
 	        if right:
 	            self.xvel = 6.3
 	            self.lado = 'derecha'
-        if space:
+        '''if space:
         	if self.enemy_get is not None:
 	            self.enemy_get.rect.x=self.rect.x
 	            self.enemy_get.rect.y=self.rect.y
 	            self.enemy_get.salir_disparado(self.lado)
 	            self.enemy_get = None
         	if self.tongue <= 0:
-	            self.tongue = 100
+	            self.tongue = 100'''
         #print(self.tongue)
         #self.enemy_get.update(platforms, 0, 0)
         #self.screen.blit(self.enemy_get.image, ())
+
+        #franco
+        if self.agarrado == True:
+            self.espera = self.espera + 1
+            print(self.espera)
+            if self.espera >= 8:
+                ########### aca no estoy seguro... antes estaba solo espacio y por eso siempre se lanzaba el insecto aunque no lo tengas
+                    ####### ahora puse que tenga que tenerlo
+                if space== True:
+                    print('xxxxxxxxxxxxxxxxxx')
+                    entities.add(self.enemy_get)
+                    self.enemy_get.rect.x=self.rect.x
+                    self.enemy_get.rect.y=self.rect.y+12
+                    self.enemy_get.salir_disparado(self.lado)
+                    self.espera = 0
+                    self.agarrado = False
+                    if self.tongue <= 0:
+                        self.tongue = 100
+                #print(self.tongue)
+                #self.enemy_get.update(platforms, 0, 0)
+                #setlf.screen.blit(self.enemy_get.image, ())
 
         if space and self.sacandolengua==False:
             self.sacandolengua = True
@@ -917,7 +937,7 @@ class Player(Entity):
         self.onGround = False;
         # do y-axis collisions
         self.collide(0, self.yvel, platforms)
-        vida = self.collide_enemies(enemies)
+        vida = self.collide_enemies(enemies, entities)
         self.beobserver(enemies, platforms, entities,  level_width, level_high)
 
         if(self.rect.y > level_high or self.rect.right < 0 or self.rect.left > level_width or (vida)):
@@ -973,7 +993,7 @@ class Player(Entity):
                     self.yvel = 0
                     print("collide top")
 
-    def collide_enemies(self, enemies):
+    '''def collide_enemies(self, enemies, entities):
         for e in enemies:
             if pygame.sprite.collide_rect(self, e):
                 if isinstance(e, EnemyMosquito):
@@ -981,14 +1001,48 @@ class Player(Entity):
                         return False
                 print("--------CHOCA------")
                 return True
+        return False'''
+    def collide_enemies(self, enemies, entities):
+        for e in enemies:
+            if isinstance(e, EnemyMosquito) and self.agarrado == False and self.forma[0] != 0:
+                self.agarrado = self.agarrarObjeto(e)
+                
+                
+                if self.agarrado == True:
+                    self.enemy_get = e
+                    entities.remove(e)
+                    
+            # este es para que el enemigo tragado no le haga perder vida
+            if e == self.enemy_get:
+                return False
+            
+            # aca es para todos los demas enemigos
+            if pygame.sprite.collide_rect(self, e):
+                return True
         return False
-
     def beobserver(self, enemies, platforms, entities, level_width, level_high):
         for q in enemies:
             if isinstance(q, EnemyMosquito):
                 q.observar(self.rect.x, self.rect.y, platforms, enemies, entities, level_width, level_high)
             else:
                 q.observar(self.rect.x, self.rect.y, platforms, enemies, entities, level_width, level_high)
+
+
+    def agarrarObjeto(self, objeto):
+        agarro = False
+        
+        if self.lado == 'izquierda':
+            
+            if self.rect[0]>= objeto.rect[0] and self.rect[0] <= objeto.rect[0] + objeto.rect[2]:
+                # se usara el punto medio en el eje Y de froggy: self.rect[1] + self.rect[3]/2
+                if self.rect[1] + self.rect[3]/2 >= objeto.rect[1] and self.rect[1] + self.rect[3]/2 <= objeto.rect[1] + objeto.rect[3]:
+                    agarro = True
+        else:
+
+            if self.rect[0] + self.rect[2] >= objeto.rect[0] and self.rect[0] + self.rect[2] <= objeto.rect[0] + objeto.rect[2]:
+                if self.rect[1] + self.rect[3]/2 >= objeto.rect[1] and self.rect[1] + self.rect[3]/2 <= objeto.rect[1] + objeto.rect[3]:
+                    agarro = True
+        return agarro
 
 
 def crop(image_name, rx, ry):
