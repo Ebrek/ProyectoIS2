@@ -835,6 +835,7 @@ class Player(Entity):
         self.animacion = Animacion()
         self.agarrado = False
         self.espera = 0
+        
 
         ################
         self.forma = [0, 'ida']
@@ -878,8 +879,8 @@ class Player(Entity):
         #franco
         if self.agarrado == True:
             self.espera = self.espera + 1
-            print(self.espera)
-            if self.espera >= 8:
+
+            if self.espera >= 10:
                 ########### aca no estoy seguro... antes estaba solo espacio y por eso siempre se lanzaba el insecto aunque no lo tengas
                     ####### ahora puse que tenga que tenerlo
                 if space== True:
@@ -892,9 +893,12 @@ class Player(Entity):
                     self.agarrado = False
                     if self.tongue <= 0:
                         self.tongue = 100
-                #print(self.tongue)
-                #self.enemy_get.update(platforms, 0, 0)
-                #setlf.screen.blit(self.enemy_get.image, ())
+                    #print(self.tongue)
+                    #self.enemy_get.update(platforms, 0, 0)
+                    #setlf.screen.blit(self.enemy_get.image, ())
+
+        if self.espera < 15 and self.agarrado == False:
+            self.espera = self.espera + 1
 
         if space and self.sacandolengua==False:
             self.sacandolengua = True
@@ -1005,7 +1009,7 @@ class Player(Entity):
         return False'''
     def collide_enemies(self, enemies, entities):
         for e in enemies:
-            if isinstance(e, EnemyMosquito) and self.agarrado == False and self.forma[0] != 0:
+            if isinstance(e, EnemyMosquito) and self.agarrado == False and self.forma[0] != 0 and self.espera == 15:
                 self.agarrado = self.agarrarObjeto(e)
                 
                 
