@@ -124,8 +124,6 @@ class Level():
         self.camera = Camera(Camera.complex_camera, self.total_level_width, self.total_level_height)
         self.entities.add(self.player)
 
-        ENTITIES = self.entities
-
         self.backGround = Background(PATH+'platform/bg_jungle.png', [0,0], (1280, 720))
         try:
             self.playmusic(bg_music)
@@ -141,7 +139,7 @@ class Level():
         self.screen.fill([255, 255, 255])
         self.screen.blit(self.backGround.image, self.backGround.rect)
         # update player, draw everything else
-        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities, self.total_level_height):
+        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities, self.total_level_width, self.total_level_height):
             return False
         for e in self.entities:
             self.screen.blit(e.image, self.camera.apply(e))
@@ -603,7 +601,7 @@ class Entity(pygame.sprite.Sprite):
 class EnemyMosquito(Entity):
     def __init__(self, x, y):
         Entity.__init__(self)
-        self.vida=3
+        self.vida=2
         self.xvel = 4.0
         self.yvel = 4.0
         self.follow = False
@@ -616,7 +614,7 @@ class EnemyMosquito(Entity):
         self.image.convert()
         self.rect = Rect(x, y, image_rect[0], image_rect[1])
         self.disparado = False
-    def update(self, platforms, enemies, entities, posX, posY):
+    def update(self, platforms, enemies, entities, posX, posY, level_width, level_high):
         if(not self.disparado):
             self.xvel = 4.0
             self.yvel = 4.0
@@ -626,7 +624,8 @@ class EnemyMosquito(Entity):
         else:
             self.rect.x += self.xvel
             self.collide_anything(platforms, enemies, entities)
-
+        if(self.rect.y > level_high or self.rect.right < 0 or self.rect.left > level_width):
+            self.perdervida(enemies, entities)
     def move_towards_player(self, posX, posY):
         # find normalized direction vector (dx, dy) between enemy and player
         dx, dy = self.rect.x - posX, self.rect.y - posY
@@ -649,8 +648,8 @@ class EnemyMosquito(Entity):
         else:
             self.image = self._image_origin
 
-    def observar(self, posX, posY, platforms, enemies, entities):
-        self.update(platforms, enemies, entities, posX, posY)
+    def observar(self, posX, posY, platforms, enemies, entities,  level_width, level_high):
+        self.update(platforms, enemies, entities, posX, posY, level_width, level_high)
 
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
@@ -684,37 +683,25 @@ class EnemyMosquito(Entity):
             if pygame.sprite.collide_rect(self, p):
                 self.disparado = False
                 self.xvel = 0
-                if self.perdervida():
-                    enemies.remove(self)
-                    entities.remove(self)
-                    self = None
+                self.perdervida(enemies, entities)
                 return
         for e in enemies:
             if e != self and pygame.sprite.collide_rect(self, e):
                 self.disparado = False
                 self.xvel = 0
                 if isinstance(e, EnemySpider):
-                    if e.perdervida():
-                        enemies.remove(e)
-                        entities.remove(e)
-                        e = None
+                	e.perdervida(enemies, entities)
                 if isinstance(e, EnemyMosquito):
-                    if e.perdervida():
-                        enemies.remove(e)
-                        entities.remove(e)
-                        e = None
-                if self.perdervida():
-                    enemies.remove(self)
-                    entities.remove(self)
-                    self = None
+                	e.perdervida(enemies, entities)
+                self.perdervida(enemies, entities)
                 return
 
-    def perdervida(self):
+    def perdervida(self, enemies, entities):
         self.vida = self.vida - 1
         if self.vida < 1: #morir
-            return True
-        else:
-            False
+            enemies.remove(self)
+            entities.remove(self)
+            self = None
 
 class EnemySpider(Entity):
     def __init__(self, x, y):
@@ -731,12 +718,14 @@ class EnemySpider(Entity):
         image_rect = (self.image.get_rect().size)
         self.image.convert()
         self.rect = Rect(x, y, image_rect[0], image_rect[1])
-    def update(self, platforms, posX, posY):
+    def update(self, platforms, enemies, entities, posX, posY, level_width, level_high):
         self.xvel = 3.0
         self.yvel = 4.0
         self.move_towards_player(posX, posY)
         self.collide(self.xvel, 0, platforms)
         self.collide(0, self.yvel, platforms)
+        if(self.rect.y > level_high or self.rect.right < 0 or self.rect.left > level_width):
+            self.perdervida(enemies, entities)
 
     def move_towards_player(self, posX, posY):
         dist = math.hypot(self.rect.x - posX, self.rect.y - posY) #math.sqrt(dx*dx + dy*dy)
@@ -755,8 +744,8 @@ class EnemySpider(Entity):
                 self.image = self._image_origin
                 self.rect.x -=self.xvel
 
-    def observar(self, posX, posY, platforms):
-        self.update(platforms, posX, posY)
+    def observar(self, posX, posY, platforms, enemies, entities,  level_width, level_high):
+        self.update(platforms, enemies, entities, posX, posY, level_width, level_high)
     def collide(self, xvel, yvel, platforms):
         for p in platforms:
             if pygame.sprite.collide_rect(self, p):
@@ -777,13 +766,12 @@ class EnemySpider(Entity):
                     print ("Enemy collide top")
     def overlap(self, t1,t2):
         return t1[0]<=t2[1] and t2[0]<=t1[0]
-    def perdervida(self):
-        self.vida=self.vida-1
-        if self.vida<1:
-            #morir
-            return True
-        else:
-            False
+    def perdervida(self, enemies, entities):
+        self.vida = self.vida - 1
+        if self.vida < 1: #morir
+            enemies.remove(self)
+            entities.remove(self)
+            self = None
 
 class Player(Entity):
     def __init__(self, x, y, image_path):
@@ -846,7 +834,7 @@ class Player(Entity):
 
         self.forma_walk = [0, 'ida']
         self.sacandolengua=False
-    def update(self, up, down, left, right, space, running, platforms, enemies, entities, level_high):
+    def update(self, up, down, left, right, space, running, platforms, enemies, entities, level_width, level_high):
         vida = True
         if up:
             # only jump if on the ground
@@ -869,11 +857,13 @@ class Player(Entity):
 	            self.xvel = 6.3
 	            self.lado = 'derecha'
         if space:
-            self.enemy_get.rect.x=self.rect.x
-            self.enemy_get.rect.y=self.rect.y+12
-            self.enemy_get.salir_disparado(self.lado)
-            if self.tongue <= 0:
-                self.tongue = 100
+        	if self.enemy_get is not None:
+	            self.enemy_get.rect.x=self.rect.x
+	            self.enemy_get.rect.y=self.rect.y
+	            self.enemy_get.salir_disparado(self.lado)
+	            self.enemy_get = None
+        	if self.tongue <= 0:
+	            self.tongue = 100
         #print(self.tongue)
         #self.enemy_get.update(platforms, 0, 0)
         #self.screen.blit(self.enemy_get.image, ())
@@ -921,9 +911,9 @@ class Player(Entity):
         # do y-axis collisions
         self.collide(0, self.yvel, platforms)
         vida = self.collide_enemies(enemies)
-        self.beobserver(enemies, platforms, entities)
+        self.beobserver(enemies, platforms, entities,  level_width, level_high)
 
-        if(self.rect.y > level_high or (vida)):
+        if(self.rect.y > level_high or self.rect.right < 0 or self.rect.left > level_width or (vida)):
             return False
         else:
             return True
@@ -986,12 +976,12 @@ class Player(Entity):
                 return True
         return False
 
-    def beobserver(self, enemies, platforms, entities):
+    def beobserver(self, enemies, platforms, entities, level_width, level_high):
         for q in enemies:
             if isinstance(q, EnemyMosquito):
-                q.observar(self.rect.x, self.rect.y, platforms, enemies, entities)
+                q.observar(self.rect.x, self.rect.y, platforms, enemies, entities, level_width, level_high)
             else:
-                q.observar(self.rect.x, self.rect.y, platforms)
+                q.observar(self.rect.x, self.rect.y, platforms, enemies, entities, level_width, level_high)
 
 
 def crop(image_name, rx, ry):
