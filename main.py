@@ -799,7 +799,7 @@ class Player(Entity):
         self._image_toLeft = pygame.transform.flip(self._image_origin, True, False).convert_alpha()
         self.image  = self._image_origin
 
-        image_rect = (self.image.get_rect().size)
+        image_rect = (32,32)#(self.image.get_rect().size)
         self.rect = Rect(x, y, image_rect[0], image_rect[1])
         self.tongue = 0
 
@@ -861,12 +861,13 @@ class Player(Entity):
             pass
         #if running:
             #self.xvel = 12
-        if left:
-            self.xvel = -6.3
-            self.lado = 'izquierda'
-        if right:
-            self.xvel = 6.3
-            self.lado = 'derecha'
+        if not self.sacandolengua:
+	        if left:
+	            self.xvel = -6.3
+	            self.lado = 'izquierda'
+	        if right:
+	            self.xvel = 6.3
+	            self.lado = 'derecha'
         if space:
             self.enemy_get.rect.x=self.rect.x
             self.enemy_get.rect.y=self.rect.y+12
@@ -879,10 +880,13 @@ class Player(Entity):
 
         if space and self.sacandolengua==False:
             self.sacandolengua = True
-
         if self.sacandolengua == True:
 	        #cambiar imagen
 	        self.sacarlengua(self.lado)
+	        if abs(self.xvel) > 0.2: 
+	        	self.xvel =  self.xvel - numpy.sign(self.xvel)*0.1
+	        else:
+	        	self.xvel = 0
 
         if not self.onGround:
             # only accelerate with gravity if in the air
