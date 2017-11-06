@@ -374,7 +374,7 @@ def main():
 
     up = down = left = right = space = running = False
     #para cambiar niveles cambiar el nombre a level (no duplicados)
-    level = [# level de testeo
+    levelx = [# level de testeo
         "                                                                                                                             ",
         "                                                                                                                             ",
         "                                                                                                                             ",
@@ -442,7 +442,7 @@ def main():
         "                  G                                                                                                           ",
         "           GG    PPP                           GG                         GG                          PPP                     ",
         "                 666                                                                                  666                     ",
-        "  F!                             GG  B  GG            GGG   B  S  GGG           D   S GG                             ¡       ",
+        "  F!                             GG  B  GG            GGG   B  S  GGG           D   S GG                             ¡       E",
         "PPPPPPPPPPPP1                  3PPPPPPPPPPP1        3PPPPPPPPPPPPPPPPP1        3PPPPPPPPPPP1                     3PPPPPPPPPPPP",
         "2222222266666        GGG       6666662222222        2222222222222222222        2222222266666                     6666622222222",
         "22226666             PPP             6666666        6666666666666666666        66666666         PPP                   22222222",
@@ -458,34 +458,67 @@ def main():
 
 
 
-    level3 = [
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             ",
-        "                                                                                                                             "]
+    level1 =  [
+        "                                                                                                                                 ",
+        "                                                                                                                                 ",
+        "                                                                                                                                 ",
+        "                                                                                                                                 ",
+        "                                                                                                                                 ",
+        "                                                                                                                                 ",
+        "                                                                                                                                 ",
+        "    F !         Q                  S                                                                                             ",
+        "PPPPPPPPPPPP1            3PPPPPPPPPP1                                                                                            ",
+        "2222222266666            666666666666                                                                                            ",
+        "22226666                                                                                                                         ",
+        "666                                                                                                                              ",
+        "                                                                                                                                 ",
+        "                                                  Q                                                                   S   GGGGG  ",
+        "                                                                                 Q                       3P          PPPPPPPPPPPP",
+        "                                              3PPPPPPP1                                        PP        P6P         666666666666",
+        "                                              666666666                                        22          6P                    ",
+        "                                                                                          PP   22           6P                   ",
+        "                                                                                          22   22            6P                  ",
+        "                                                                                     PP   22   22             6P                 ",
+        "                                                                                     22   22   22              6P                ",
+        "                                                                                PP   22   22   22               6P               ",
+        "                                                                 !  S           22   22   22   22                                ",
+        "                                                               3PPPPPPPP1       22   22   22   22          S                  E  ",
+        "                                                             3P2222222222       22   22   22   22         3PPPPPPPPPPPPPPPPPPPPPP",
+        "GGGGGGGGGPPPPP1                     GG   D                  3222222222222       22   22   22   22         22222222222222222222222",
+        "GGGGGPPPP222222                3PPPPPPPPPPPP1             3P2222222222222       22   22   22   22         22222222222222222222222",
+        "PPPPP2222222222              3P22222222222222P3           222222222222222       22   22   22   22         22222222222222222222222"]
 
 
 
+
+    level = [
+        "                     22                                                                                                      ",
+        "                     22                                                                                                      ",
+        "                     22                                                                                                      ",
+        "                     22                                                                                                      ",
+        "                     22                                                                                                      ",
+        "          PP         22                                                                                                      ",
+        "          22         22                                                                                                      ",
+        "          22         22                                                                                                      ",
+        "PP        22         22                                                                                                      ",
+        "          22         22                                                                                                      ",
+        "          22         22                                                                                                      ",
+        "          22         22                                                                                                      ",
+        "        PP22         22                                                                                                      ",
+        "          22         22                                                                                                      ",
+        "          22         22                                                                                                      ",
+        "          22         22                                                                                                      ",
+        "PP        22         22                                                                                                      ",
+        "          22         22                                                                                                      ",
+        "          22         22                                                                                                      ",
+        "          22         22                                                                                                      ",
+        "        PP22         22                                                                                                      ",
+        "          22         22                                                                                                      ",
+        "   F      22                                                                                                                 ",
+        "PPPPPPPPPP22                                                                                                                 ",
+        "222222222222         PPPPPPPPPPPPP                                                                                           ",
+        "222222222222         2222222222222                                                                                           ",
+        "222222222222         2222222222222                                                                                           "]
 
     level_vacio = [
         "                                                                                                                             ",
@@ -512,8 +545,6 @@ def main():
         "                                                                                                                             ",
         "                                                                                                                             ",
         "                                                                                                                             "]
-
-
 
     player_settings = (32, 32,PATH+ "froggy.png")
 
@@ -835,7 +866,7 @@ class Player(Entity):
         self.animacion = Animacion()
         self.agarrado = False
         self.espera = 0
-        
+
 
         ################
         self.forma = [0, 'ida']
@@ -1011,16 +1042,16 @@ class Player(Entity):
         for e in enemies:
             if isinstance(e, EnemyMosquito) and self.agarrado == False and self.forma[0] != 0 and self.espera == 15:
                 self.agarrado = self.agarrarObjeto(e)
-                
-                
+
+
                 if self.agarrado == True:
                     self.enemy_get = e
                     entities.remove(e)
-                    
+
             # este es para que el enemigo tragado no le haga perder vida
             if e == self.enemy_get:
                 pass
-            
+
             # aca es para todos los demas enemigos
             elif pygame.sprite.collide_rect(self, e):
                 return True
@@ -1035,9 +1066,9 @@ class Player(Entity):
 
     def agarrarObjeto(self, objeto):
         agarro = False
-        
+
         if self.lado == 'izquierda':
-            
+
             if self.rect[0]>= objeto.rect[0] and self.rect[0] <= objeto.rect[0] + objeto.rect[2]:
                 # se usara el punto medio en el eje Y de froggy: self.rect[1] + self.rect[3]/2
                 if self.rect[1] + self.rect[3]/2 >= objeto.rect[1] and self.rect[1] + self.rect[3]/2 <= objeto.rect[1] + objeto.rect[3]:
