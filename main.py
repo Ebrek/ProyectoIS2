@@ -34,6 +34,9 @@ class Level():
         self.platforms = []
         self.decorations = []
         self.enemies = []
+        ########################################################nuevo
+        self.gemas = []
+        ########################################################
         x = y = 0
         self.level = level
         # build the level
@@ -99,10 +102,12 @@ class Level():
 
 #monedas como decoraciones por ahora
                     #GEMAS
+                    ########################################################
                 if col == "G":
-                    g = Decoration(x, y, 16,16, "items/gem_9.png")
-                    self.decorations.append(g)
+                    g = Gemas(x, y, 16,16, "items/gem_9.png")
+                    self.gemas.append(g)
                     self.entities.add(g)
+                    ########################################################
 
                 if col == "!":
                     d = Decoration(x, y, 128,128, "platform/jungle_pack_59.png")
@@ -144,7 +149,7 @@ class Level():
         self.screen.fill([255, 255, 255])
         self.screen.blit(self.backGround.image, self.backGround.rect)
         # update player, draw everything else
-        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities, self.total_level_width, self.total_level_height):
+        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities, self.gemas, self.total_level_width, self.total_level_height):
             return False
         for e in self.entities:
             self.screen.blit(e.image, self.camera.apply(e))
@@ -499,7 +504,7 @@ def main():
         "                     22                                                                                                      ",
         "          PP         22                                                                                                      ",
         "          22         22                                                                                                      ",
-        "          22         22                                                                                                      ",
+        "GG        22         22                                                                                                      ",
         "PP        22         22                                                                                                      ",
         "          22         22                                                                                                      ",
         "          22         22                                                                                                      ",
@@ -507,11 +512,11 @@ def main():
         "        PP22         22                                                                                                      ",
         "          22         22                                                                                                      ",
         "          22         22                                                                                                      ",
-        "          22         22                                                                                                      ",
+        " G        22         22                                                                                                      ",
         "PP        22         22                                                                                                      ",
         "          22         22                                                                                                      ",
         "          22         22                                                                                                      ",
-        "          22         22                                                                                                      ",
+        "        G 22         22                                                                                                      ",
         "        PP22         22                                                                                                      ",
         "          22         22                                                                                                      ",
         "   F      22                                                                                                                 ",
@@ -867,13 +872,16 @@ class Player(Entity):
         self.agarrado = False
         self.espera = 0
 
+        ############################################################################
+        self.puntaje = 0
+
 
         ################
         self.forma = [0, 'ida']
 
         self.forma_walk = [0, 'ida']
         self.sacandolengua=False
-    def update(self, up, down, left, right, space, running, platforms, enemies, entities, level_width, level_high):
+    def update(self, up, down, left, right, space, running, platforms, enemies, entities, gemas, level_width, level_high):
         vida = True
         if up:
             # only jump if on the ground
@@ -975,6 +983,11 @@ class Player(Entity):
         self.collide(0, self.yvel, platforms)
         vida = self.collide_enemies(enemies, entities)
         self.beobserver(enemies, platforms, entities,  level_width, level_high)
+        #############################################################################################
+        self.collide_gemas(gemas, entities)
+        print('puntaje')
+        print(self.puntaje)
+        #############################################################################################
 
         if(self.rect.y > level_high or self.rect.right < 0 or self.rect.left > level_width or (vida)):
             return False
@@ -1056,6 +1069,22 @@ class Player(Entity):
             elif pygame.sprite.collide_rect(self, e):
                 return True
         return False
+
+    #############################################################################################
+    def collide_gemas(self, gemas, entities):
+        for e in gemas:
+            cogio_gema = False
+
+            cogio_gema = self.agarrarObjeto(e)
+
+            if(cogio_gema == True):
+                self.puntaje = self.puntaje + e.valor
+                entities.remove(e)
+                gemas.remove(e)
+            
+        return False
+    #############################################################################################
+    
     def beobserver(self, enemies, platforms, entities, level_width, level_high):
         for q in enemies:
             if isinstance(q, EnemyMosquito):
@@ -1137,6 +1166,26 @@ class Decoration(Entity):
     def update(self):
         pass
 
+#############################################################################################
+class Gemas(Entity):
+    def __init__(self, x, y, w, h, image_path):
+        Entity.__init__(self)
+        self._image_origin = pygame.image.load(PATH + image_path)
+        self._image_origin = pygame.transform.scale(self._image_origin, (w, h))
+        self.image = self._image_origin
+        image_rect = None
+        try:
+            image_rect = IMAGE_SIZES[PATH + image_path]
+        except KeyError:
+            image_rect = crop(PATH + image_path, w, h)
+            IMAGE_SIZES[PATH + image_path] = image_rect
+        self.rect = Rect(x, y - h + 32, image_rect[0], image_rect[1])
+
+        self.valor = 20
+
+    def update(self):
+        pass
+#############################################################################################
 
 class ExitBlock(Platform):
     def __init__(self, x, y):
