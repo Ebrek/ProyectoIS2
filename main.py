@@ -100,7 +100,6 @@ class Level():
                     self.decorations.append(d)
                     self.entities.add(d)
 
-#monedas como decoraciones por ahora
                     #GEMAS
                     ########################################################
                 if col == "G":
@@ -379,7 +378,7 @@ def main():
 
     up = down = left = right = space = running = False
     #para cambiar niveles cambiar el nombre a level (no duplicados)
-    levelx = [# level de testeo
+    level0 = [# level de testeo
         "                                                                                                                             ",
         "                                                                                                                             ",
         "                                                                                                                             ",
@@ -405,7 +404,7 @@ def main():
         "    ¡  F     !  Q             S P  S  PB  GG  D     ¡                   D      GGGGG       222222222           22222222222222",
         "PPPPPPPPPPPPPPPPPP1          3PP2PPPPP2PPPPPPPPPPPPPPP1        P     3PPPPPPPPPPPPPPPPPPPP2222222222           22222222222222"]
     #levels
-    level1 = [
+    level6 = [
         "                                                                                                                             ",
         "                                                                                                                             ",
         "                                                                                                                             ",
@@ -463,7 +462,7 @@ def main():
 
 
 
-    level1 =  [
+    levelx =  [
         "                                                                                                                                 ",
         "                                                                                                                                 ",
         "                                                                                                                                 ",
@@ -478,52 +477,52 @@ def main():
         "666                                                                                                                              ",
         "                                                                                                                                 ",
         "                                                  Q                                                                   S   GGGGG  ",
-        "                                                                                 Q                       3P          PPPPPPPPPPPP",
-        "                                              3PPPPPPP1                                        PP        P6P         666666666666",
+        "                                                                                 Q                       3P          3PPPPPPPPPPP",
+        "                                              3PPPPPPP1                                        31        66P         666666666666",
         "                                              666666666                                        22          6P                    ",
-        "                                                                                          PP   22           6P                   ",
+        "                                                                                          31   22           6P                   ",
         "                                                                                          22   22            6P                  ",
-        "                                                                                     PP   22   22             6P                 ",
+        "                                                                                     31   22   22             6P                 ",
         "                                                                                     22   22   22              6P                ",
-        "                                                                                PP   22   22   22               6P               ",
+        "                                                                                31   22   22   22               6P               ",
         "                                                                 !  S           22   22   22   22                                ",
         "                                                               3PPPPPPPP1       22   22   22   22          S                  E  ",
         "                                                             3P2222222222       22   22   22   22         3PPPPPPPPPPPPPPPPPPPPPP",
-        "GGGGGGGGGPPPPP1                     GG   D                  3222222222222       22   22   22   22         22222222222222222222222",
+        "GGGGGGGGG3PPPP1                     GG   D                  3222222222222       22   22   22   22         22222222222222222222222",
         "GGGGGPPPP222222                3PPPPPPPPPPPP1             3P2222222222222       22   22   22   22         22222222222222222222222",
-        "PPPPP2222222222              3P22222222222222P3           222222222222222       22   22   22   22         22222222222222222222222"]
+        "PPPPPP222222222              3P22222222222222P3           222222222222222       22   22   22   22         22222222222222222222222"]
 
 
 
 
     level = [
+        " S S S S  S          22                                                                                                      ",
+        "PPPPPPPPPPPPPP3      22                                    pppppppppppppppppppppppppp                                        ",
+        "666666666666666      22                                                                                                      ",
         "                     22                                                                                                      ",
-        "                     22                                                                                                      ",
-        "                     22                                                                                                      ",
-        "                     22                                                                                                      ",
-        "                     22                                                                                                      ",
-        "          PP         22                                                                                                      ",
-        "          22         22                                                                                                      ",
-        "GG        22         22                                                                                                      ",
-        "PP        22         22                                                                                                      ",
-        "          22         22                                                                                                      ",
-        "          22         22                                                                                                      ",
-        "          22         22                                                                                                      ",
-        "        PP22         22                                                                                                      ",
-        "          22         22                                                                                                      ",
-        "          22         22                                                                                                      ",
-        " G        22         22                                                                                                      ",
-        "PP        22         22                                                                                                      ",
-        "          22         22                                                                                                      ",
-        "          22         22                                                                                                      ",
-        "        G 22         22                                                                                                      ",
-        "        PP22         22                                                                                                      ",
-        "          22         22                                                                                                      ",
-        "   F      22                                                                                                                 ",
-        "PPPPPPPPPP22                                                                                                                 ",
-        "222222222222         PPPPPPPPPPPPP                                                                                           ",
-        "222222222222         2222222222222                                                                                           ",
-        "222222222222         2222222222222                                                                                           "]
+        "                     22PPPPPPPPPPPPPPPPPPPPPPPPPPPP1                                                                         ",
+        "          31    G    2222222666666666666666666222222                                                                         ",
+        "          22    G    2222666                  666666                                                                         ",
+        "GG        22    G    2226                                                                                                    ",
+        "P1        22    G    226  Q                                                                                                  ",
+        "66        22    G    22                                                                                                      ",
+        "          22    G    22                                                                                                      ",
+        "        GG22    G    22                                                                                                      ",
+        "        3P22         22                                                                                                      ",
+        "        6622         22                        3PPPPPPPPPPP1                                                                 ",
+        "          22         22                     Q  2222222226666                                                                 ",
+        " G        22         22           3PPPPPPPPPPPP222226666                                                                     ",
+        "P1        22         22            66666222222222226                                                                         ",
+        "66        22    G    22PPP1             66622222222                                                                          ",
+        "          22    G    2222221               666622221                                                                         ",
+        "        GG22    G    2222222P1                 22222                                                                         ",
+        "        3P22         22                3PPPPP2222222PP1                                                                      ",
+        "        6622         22                6666666222222222PPP1                                                                  ",
+        "   F      22                     1            2222222222222PPPPPP                                                            ",
+        "PPPPPPPPPP22                    32            G222222222222222222                                                            ",
+        "222222222222         3PPPPPPPPPP22     PPPPP222222222222222222222                                                            ",
+        "222222222222         2222222222222     66622222222222222222222222                                                            ",
+        "222222222222         2222222222222        22222222222222222222222                                                            "]
 
     level_vacio = [
         "                                                                                                                             ",
@@ -1081,10 +1080,10 @@ class Player(Entity):
                 self.puntaje = self.puntaje + e.valor
                 entities.remove(e)
                 gemas.remove(e)
-            
+
         return False
     #############################################################################################
-    
+
     def beobserver(self, enemies, platforms, entities, level_width, level_high):
         for q in enemies:
             if isinstance(q, EnemyMosquito):
@@ -1095,7 +1094,7 @@ class Player(Entity):
 
     def agarrarObjeto(self, objeto):
         agarro = False
-
+        """
         if self.lado == 'izquierda':
 
             if self.rect[0]>= objeto.rect[0] and self.rect[0] <= objeto.rect[0] + objeto.rect[2]:
@@ -1107,7 +1106,10 @@ class Player(Entity):
             if self.rect[0] + self.rect[2] >= objeto.rect[0] and self.rect[0] + self.rect[2] <= objeto.rect[0] + objeto.rect[2]:
                 if self.rect[1] + self.rect[3]/2 >= objeto.rect[1] and self.rect[1] + self.rect[3]/2 <= objeto.rect[1] + objeto.rect[3]:
                     agarro = True
-        return agarro
+        """
+
+        #return agarro
+        return pygame.sprite.collide_rect(self, objeto)
 
 
 def crop(image_name, rx, ry):
