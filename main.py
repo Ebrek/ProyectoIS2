@@ -133,7 +133,7 @@ class Level():
         self.camera = Camera(Camera.complex_camera, self.total_level_width, self.total_level_height)
         self.entities.add(self.player)
 
-        self.backGround = Background(PATH+'platform/bg_jungle.png', [0,0], (1280, 720))
+        self.backGround = Background(PATH+'platform/bg_jungle.png', [0,0], (800, 640))
         try:
             self.playmusic(bg_music)
         except Exception:
@@ -161,7 +161,7 @@ class Background(pygame.sprite.Sprite):
     def __init__(self, image_file, location, screen_sizes):
         pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
         self.image = pygame.image.load(image_file)
-        self.image = pygame.transform.scale(self.image, (1280, 720))
+        self.image = pygame.transform.scale(self.image, screen_sizes)
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = location
 

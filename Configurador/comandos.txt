@@ -1,0 +1,17 @@
+0: mkdir proyecto_django
+1: cd proyecto_django
+2: mkvirtualenv venv
+3: dir
+6: pip install django
+7: django-admin startproject mysite
+8: dir
+9: cd mysite ##
+18: py manage.py startapp mimodulo
+20: cd mimodulo
+22: cd ..
+24: py manage.py migrate
+25: py manage.py createsuperuser
+26: py manage.py runserver
+27: py manage.py makemigrations
+28: py manage.py migrate
+29: py manage.py runserver
