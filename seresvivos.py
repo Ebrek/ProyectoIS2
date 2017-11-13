@@ -4,13 +4,16 @@ from PIL import Image, ImageOps
 import numpy, math
 from constantes import *
 from objetosestaticos import ExitBlock
+from conexion import Conexion
 
 class EnemyMosquito(Entity):
     def __init__(self, x, y):
         Entity.__init__(self)
-        self.vida=1
-        self.xvel = 4.0
-        self.yvel = 4.0
+        data = Conexion().obtener_ajustesgeneral()
+        self.vida=data["mosquito_health"]
+        
+        self.xvel_ini = data["mosquito_speed_x"]
+        self.yvel_ini = data["mosquito_speed_y"]
         self.follow = False
         self.onGround = False
         self._image_origin = pygame.image.load(PATH + "mosquito1.png")
@@ -23,8 +26,7 @@ class EnemyMosquito(Entity):
         self.disparado = False
     def update(self, platforms, enemies, entities, posX, posY, level_width, level_high):
         if(not self.disparado):
-            self.xvel = 4.0
-            self.yvel = 4.0
+            self.xvel, self.yvel = self.xvel_ini, self.yvel_ini
             self.move_towards_player(posX, posY)
             self.collide(self.xvel, 0, platforms)
             self.collide(0, self.yvel, platforms)
@@ -45,7 +47,7 @@ class EnemyMosquito(Entity):
         try:
             dx, dy = dx * -1.0 / dist, dy * -1.0 / dist
         except ZeroDivisionError:
-            print("Divided by zero")
+            pass
         # move along this normalized vector towards the player at current speed
         self.xvel, self.yvel = dx * self.xvel, dy * self.yvel
         self.rect.x += self.xvel
@@ -65,18 +67,18 @@ class EnemyMosquito(Entity):
                 if abs(self.rect.right - p.rect.left) < abs(self.xvel) + 1:
                     self.rect.right = p.rect.left
                     self.xvel = 0
-                    print("Enemy collide right")
+                    #print("Enemy collide right")
                 if abs(self.rect.left - p.rect.right) < abs(self.xvel) + 1:
                     self.rect.left = p.rect.right
                     self.xvel = 0
-                    print("Enemy collide left")
+                    #print("Enemy collide left")
                 if abs(self.rect.bottom - p.rect.top) < abs(self.yvel) + 1:
                     self.rect.bottom = p.rect.top
                     self.yvel = 0
                 if abs(self.rect.top - p.rect.bottom) < abs(self.yvel) + 1:
                     self.rect.top = p.rect.bottom
                     self.yvel = 0
-                    print("Enemy collide top")
+                    #print("Enemy collide top")
 
     def salir_disparado(self, dir):
         print("salidisparado")
@@ -114,9 +116,10 @@ class EnemyMosquito(Entity):
 class EnemySpider(Entity):
     def __init__(self, x, y):
         Entity.__init__(self)
-        self.vida = 1
-        self.xvel = 4.0
-        self.yvel = 4.0
+        data = Conexion().obtener_ajustesgeneral()
+        self.vida = data["spider_health"]
+        self.xvel_ini = data["spider_speed_x"]
+        self.yvel_ini = data["spider_speed_y"]
         self.follow = False
         self.onGround = False
         self._image_origin = pygame.image.load(PATH + "spider1.png")
@@ -127,8 +130,7 @@ class EnemySpider(Entity):
         self.image.convert()
         self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
     def update(self, platforms, enemies, entities, posX, posY, level_width, level_high):
-        self.xvel = 3.0
-        self.yvel = 4.0
+        self.xvel, self.yvel = self.xvel_ini, self.yvel_ini
         self.move_towards_player(posX, posY)
         self.collide(self.xvel, 0, platforms)
         self.collide(0, self.yvel, platforms)
@@ -160,18 +162,18 @@ class EnemySpider(Entity):
                 if abs(self.rect.right - p.rect.left) < abs(self.xvel)+1 and self.overlap((self.rect.top, self.rect.bottom),(p.rect.top, p.rect.bottom)):
                     self.rect.right = p.rect.left
                     self.xvel = 0
-                    print ("Enemy collide right")
+                    #print ("Enemy collide right")
                 if abs(self.rect.left - p.rect.right) < abs(self.xvel)+1 and self.overlap((self.rect.top, self.rect.bottom),(p.rect.top, p.rect.bottom)):
                     self.rect.left = p.rect.right
                     self.xvel = 0
-                    print ("Enemy collide left")
+                    #print ("Enemy collide left")
                 if abs(self.rect.bottom - p.rect.top) < abs(self.yvel)+1:
                     self.rect.bottom = p.rect.top
                     self.yvel = 0
                 if abs(self.rect.top - p.rect.bottom) < abs(self.yvel)+1:
                     self.rect.top = p.rect.bottom
                     self.yvel = 0
-                    print ("Enemy collide top")
+                    #print ("Enemy collide top")
     def overlap(self, t1,t2):
         return t1[0]<=t2[1] and t2[0]<=t1[0]
     def perdervida(self, enemies, entities):
@@ -239,7 +241,8 @@ class Player(Entity):
         self.espera = 0
 
         ############################################################################
-        self.puntaje = 0
+        self.updates_sin_perder_vida = 30
+        self.contador_sin_perder_vida = 30
 
 
         ################
@@ -247,7 +250,7 @@ class Player(Entity):
 
         self.forma_walk = [0, 'ida']
         self.sacandolengua=False
-    def update(self, up, down, left, right, space, running, platforms, enemies, entities, gemas, level_width, level_high):
+    def update(self, up, down, left, right, space, running, platforms, enemies, entities, gemas, datos, level_width, level_high):
         vida = True
         if up:
             # only jump if on the ground
@@ -277,19 +280,20 @@ class Player(Entity):
 	            self.enemy_get = None
         	if self.tongue <= 0:
 	            self.tongue = 100'''
-        #print(self.tongue)
+        ##print(self.tongue)
         #self.enemy_get.update(platforms, 0, 0)
         #self.screen.blit(self.enemy_get.image, ())
 
         #franco
         if self.agarrado == True:
             self.espera = self.espera + 1
+            #print(self.espera)
 
-            if self.espera >= 10:
-                ########### aca no estoy seguro... antes estaba solo espacio y por eso siempre se lanzaba el insecto aunque no lo tengas
+            if self.espera >= 15:
+                
                     ####### ahora puse que tenga que tenerlo
                 if space== True:
-                    print('xxxxxxxxxxxxxxxxxx')
+                    #print('xxxxxxxxxxxxxxxxxx')
                     entities.add(self.enemy_get)
                     self.enemy_get.rect.x=self.rect.x
                     self.enemy_get.rect.y=self.rect.y
@@ -298,7 +302,7 @@ class Player(Entity):
                     self.agarrado = False
                     if self.tongue <= 0:
                         self.tongue = 100
-                    #print(self.tongue)
+                    ##print(self.tongue)
                     #self.enemy_get.update(platforms, 0, 0)
                     #setlf.screen.blit(self.enemy_get.image, ())
 
@@ -347,15 +351,13 @@ class Player(Entity):
         self.onGround = False;
         # do y-axis collisions
         self.collide(0, self.yvel, platforms)
-        vida = self.collide_enemies(enemies, entities)
+        vida = self.collide_enemies(enemies, entities, datos)
         self.beobserver(enemies, platforms, entities,  level_width, level_high)
         #############################################################################################
-        self.collide_gemas(gemas, entities)
-        print('puntaje')
-        print(self.puntaje)
+        self.collide_gemas(gemas, entities, datos)
         #############################################################################################
 
-        if(self.rect.y > level_high or self.rect.right < 0 or self.rect.left > level_width or (vida)):
+        if(self.rect.y > level_high or self.rect.right < 0 or self.rect.left > level_width or vida == False):
             return False
         else:
             return True
@@ -367,7 +369,7 @@ class Player(Entity):
             self.sacandolengua = False
             self.forma = [0, 'ida']
         elif self.counter_lengua % 5 == 0:
-            print(self.counter_lengua)
+            #print(self.counter_lengua)
             if dir == 'derecha':
                 self.forma = self.animacion.animarCompleta(self.imagenes_derecha, self.forma)
                 self.image = self.imagenes_derecha[self.forma[0]]
@@ -380,7 +382,7 @@ class Player(Entity):
         if self.counter > 50:
             self.counter = 0
         elif self.counter % 10 == 0:
-            print(self.counter)
+            #print(self.counter)
             if dir == 'derecha':
                 self.forma_walk = self.animacion.animarCompleta(self.imagenes_walk_derecha, self.forma_walk)
                 self.image = self.imagenes_walk_derecha[self.forma_walk[0]]
@@ -395,10 +397,10 @@ class Player(Entity):
                     pygame.event.post(pygame.event.Event(QUIT))
                 if xvel > 0:
                     self.rect.right = p.rect.left
-                    print("collide right")
+                    #print("collide right")
                 if xvel < 0:
                     self.rect.left = p.rect.right
-                    print("collide left")
+                    #print("collide left")
                 if yvel > 0:
                     self.rect.bottom = p.rect.top
                     self.onGround = True
@@ -406,7 +408,7 @@ class Player(Entity):
                 if yvel < 0:
                     self.rect.top = p.rect.bottom
                     self.yvel = 0
-                    print("collide top")
+                    #print("collide top")
 
     '''def collide_enemies(self, enemies, entities):
         for e in enemies:
@@ -414,10 +416,12 @@ class Player(Entity):
                 if isinstance(e, EnemyMosquito):
                     if e.disparado:
                         return False
-                print("--------CHOCA------")
+                #print("--------CHOCA------")
                 return True
         return False'''
-    def collide_enemies(self, enemies, entities):
+    #############################################################################################
+    def collide_enemies(self, enemies, entities, datos):
+        sigue_vivo = True
         for e in enemies:
             if isinstance(e, EnemyMosquito) and self.agarrado == False and self.forma[0] != 0 and self.espera == 15:
                 self.agarrado = self.agarrarObjeto(e)
@@ -430,24 +434,36 @@ class Player(Entity):
             # este es para que el enemigo tragado no le haga perder vida
             if e == self.enemy_get:
                 pass
+        
 
             # aca es para todos los demas enemigos
-            elif pygame.sprite.collide_rect(self, e):
-                return True
-        return False
+            elif pygame.sprite.collide_rect(self, e) :
+                if self.contador_sin_perder_vida == self.updates_sin_perder_vida:
+                    self.perder_vida(datos)
+                    if datos.vidas_restantes == 0:
+                        sigue_vivo = False
+                    self.contador_sin_perder_vida = 0
+                    return sigue_vivo
+                else:
+                    self.contador_sin_perder_vida = self.contador_sin_perder_vida + 1
+        return sigue_vivo
 
-    #############################################################################################
-    def collide_gemas(self, gemas, entities):
+    
+    def perder_vida(self, datos):
+        datos.vidas_restantes = datos.vidas_restantes - 1
+        print("vida" + str(datos.vidas_restantes))
+    
+    def collide_gemas(self, gemas, entities, datos):
         for e in gemas:
             cogio_gema = False
 
             cogio_gema = self.agarrarObjeto(e)
 
             if(cogio_gema == True):
-                self.puntaje = self.puntaje + e.valor
+                datos.puntaje = datos.puntaje + e.valor
                 entities.remove(e)
                 gemas.remove(e)
-
+            
         return False
     #############################################################################################
 

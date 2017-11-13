@@ -38,6 +38,13 @@ class Level():
             self.playmusic(bg_music)
         except Exception:
             print("no bg music")
+
+        ####################################################################################################
+        self.vidas_inicio = 3
+        self.letra_datos = 20
+        self.datos = Datos_partida("items/gem_9.png", "items/corazon.jpg",self.letra_datos, self.vidas_inicio)
+        ####################################################################################################
+        
     def construir(self, x, y, player_settings, col):
         if col == "1":
             p = Platform(x, y, "platform/jungle_pack_07.png")
@@ -130,10 +137,23 @@ class Level():
         self.screen.fill([255, 255, 255])
         self.screen.blit(self.backGround.image, self.backGround.rect)
         # update player, draw everything else
-        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities, self.gemas, self.total_level_width, self.total_level_height):
+        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities, self.gemas, self.datos, self.total_level_width, self.total_level_height):
             return False
         for e in self.entities:
             self.screen.blit(e.image, self.camera.apply(e))
+            
+        ####################################################################################################
+        self.datos.update()
+        self.mostrarDatos()
+
+    def mostrarDatos(self):
+        ancho = 0
+
+        for d in self.datos.datos:
+            self.screen.blit(d, (400 + ancho,10))
+            ancho =  ancho + d.get_rect()[2] + 5
+        ####################################################################################################
+
     def playmusic(self, file):
         pygame.mixer.init()
         pygame.mixer.music.load(file)
@@ -145,3 +165,35 @@ class Background(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, screen_sizes)
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = location
+
+        
+class Datos_partida():
+    def __init__(self, image_path_gema, image_path_vida, letra_datos, vidas_inicio):
+        self.puntaje = 0
+        self.vidas_restantes = vidas_inicio
+        self.datos = []
+
+        # PUNTAJE
+        self.letra = pygame.font.SysFont("Arial", letra_datos)
+        self.datos.append( self.letra.render(str(self.puntaje), True, (100,200,0), None ))
+        
+        # IMAGEN GEMA
+        self._image_gema = pygame.image.load(PATH + image_path_gema)
+        self._image_gema = pygame.transform.scale(self._image_gema, (self.datos[0].get_rect()[3], self.datos[0].get_rect()[3]))
+        self.datos.append( self._image_gema )
+
+        # VIDAS INICIO
+        self.datos.append( self.letra.render(str(vidas_inicio), True, (100,200,0), None ))
+        
+        # IMAGEN VIDA
+        self._image_vida = pygame.image.load(PATH + image_path_vida)
+        self._image_vida = pygame.transform.scale(self._image_vida, (self.datos[0].get_rect()[3], self.datos[0].get_rect()[3]))
+        self.datos.append( self._image_vida )
+        
+        #self.screen.blit(imagenTextoPresent, (400, 10))
+        #self.screen.blit(imagenTextoPresent, (400 + imagenTextoPresent.get_rect()[2], 10))
+
+        
+    def update(self):
+        self.datos[0] = self.letra.render(str(self.puntaje), True, (100,200,0), None )
+        self.datos[2] = self.letra.render(str(self.vidas_restantes), True, (100,200,0), None )

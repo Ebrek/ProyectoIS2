@@ -1,7 +1,7 @@
 import sys
 import sqlite3
 conn = sqlite3.connect('db.sqlite3')
-
+conn.row_factory = sqlite3.Row
 
 class Conexion():
 
@@ -12,7 +12,6 @@ class Conexion():
         result = []
         for row in rows:
             result.append(row)
-            print(row)
         c.close() 
         return result
         
@@ -24,7 +23,6 @@ class Conexion():
         result = []
         for row in rows:
             result.append(row)
-            print(row)
         c.close() 
         return result
 
@@ -34,14 +32,6 @@ class Conexion():
             spider_health, spider_speed_x, spider_speed_y,
             mosquito_health, mosquito_speed_x, mosquito_speed_y FROM Configurador_ajustesgeneral
             LIMIT 1 """)
-        rows = c.fetchall()
-        result = []
-        for row in rows:
-            result.append(row)
-            print(row)
+        row = c.fetchone()
         c.close() 
-        return result
-
-preuba = Conexion()
-preuba.listar_niveles()
-preuba.obtener_ajustesgeneral()
+        return row
