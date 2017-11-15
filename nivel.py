@@ -154,7 +154,7 @@ class Level():
         self.screen.fill([255, 255, 255])
         self.screen.blit(self.backGround.image, self.backGround.rect)
         # update player, draw everything else
-        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities, self.gemas,self.corazon, self.datos, self.total_level_width, self.total_level_height):
+        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities, self.gemas, self.datos, self.total_level_width, self.total_level_height):
             return False
         for e in self.entities:
             self.screen.blit(e.image, self.camera.apply(e))
