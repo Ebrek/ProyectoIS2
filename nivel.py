@@ -16,6 +16,8 @@ class Level():
         self.enemies = []
         ########################################################nuevo
         self.gemas = []
+
+        self.corazon = []
         ########################################################
         x = y = 0
         self.level = level
@@ -109,6 +111,17 @@ class Level():
             g = Gemas(x, y, 16,16, "items/gem_9.png")
             self.gemas.append(g)
             self.entities.add(g)
+
+            
+
+            #CORAZON
+        if col == "C":
+            c = Corazon(x, y, 32,32, "items/vida.png")
+            self.corazon.append(c)
+            self.entities.add(c)
+
+
+            
             ########################################################
 
         if col == "!":
@@ -123,6 +136,10 @@ class Level():
             d = Decoration(x, y, 128,128, "platform/jungle_pack_66.png")
             self.decorations.append(d)
             self.entities.add(d)
+
+
+
+            
         #player
         if col == "F":
             self.player = Player(x, y, player_settings[2])
@@ -137,7 +154,7 @@ class Level():
         self.screen.fill([255, 255, 255])
         self.screen.blit(self.backGround.image, self.backGround.rect)
         # update player, draw everything else
-        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities, self.gemas, self.datos, self.total_level_width, self.total_level_height):
+        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities, self.gemas,self.corazon, self.datos, self.total_level_width, self.total_level_height):
             return False
         for e in self.entities:
             self.screen.blit(e.image, self.camera.apply(e))
@@ -158,6 +175,7 @@ class Level():
         pygame.mixer.init()
         pygame.mixer.music.load(file)
         pygame.mixer.music.play(-1, 0.0)
+        
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_file, location, screen_sizes):
         pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
