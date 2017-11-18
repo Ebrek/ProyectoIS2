@@ -26,7 +26,7 @@ def main():
 
     up = down = left = right = space = running = False
     #para cambiar niveles cambiar el nombre a level (no duplicados)
-    
+
 
     player_settings = (32, 32,PATH+ "froggy.png")
     level = [# level de testeo
@@ -52,7 +52,7 @@ def main():
         "        P                             622226                                662222222222222222222222           22222222222222",
         "                                       6666                                   6666666666666222222222           22222222222222",
         "                                                                               GGGGG       222222222           22222222222222",
-        "    ¡  F     !  Q             S P  S  PB  GG  D     ¡                   D      GGGGG       222222222           22222222222222",
+        "    ¡  F   C !  Q             S P  S  PB  GG  D     ¡                   D      GGGGG       222222222           22222222222222",
         "PPPPPPPPPPPPPPPPPP1          3PP2PPPPP2PPPPPPPPPPPPPPP1        P     3PPPPPPPPPPPPPPPPPPPP2222222222           22222222222222"]
 
     level = Level(level, player_settings, PATH+'bg_music1.ogg')
@@ -111,6 +111,3 @@ def pause():
 
 if __name__ == '__main__':
 	main()
-
-
-

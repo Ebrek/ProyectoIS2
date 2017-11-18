@@ -11,7 +11,7 @@ class EnemyMosquito(Entity):
         Entity.__init__(self)
         data = Conexion().obtener_ajustesgeneral()
         self.vida=data["mosquito_health"]
-        
+
         self.xvel_ini = data["mosquito_speed_x"]
         self.yvel_ini = data["mosquito_speed_y"]
         self.follow = False
@@ -250,7 +250,7 @@ class Player(Entity):
 
         self.forma_walk = [0, 'ida']
         self.sacandolengua=False
-    def update(self, up, down, left, right, space, running, platforms, enemies, entities, gemas, datos, level_width, level_high):
+    def update(self, up, down, left, right, space, running, platforms, enemies, entities, gemas,corazon, datos, level_width, level_high):
         vida = True
         if up:
             # only jump if on the ground
@@ -290,7 +290,7 @@ class Player(Entity):
             #print(self.espera)
 
             if self.espera >= 15:
-                
+
                     ####### ahora puse que tenga que tenerlo
                 if space== True:
                     #print('xxxxxxxxxxxxxxxxxx')
@@ -356,7 +356,7 @@ class Player(Entity):
         #############################################################################################
         self.collide_gemas(gemas, entities, datos)
         #############################################################################################
-
+        self.collide_corazon(corazon,entities,datos)
         if(self.rect.y > level_high or self.rect.right < 0 or self.rect.left > level_width or vida == False):
             return False
         else:
@@ -434,7 +434,7 @@ class Player(Entity):
             # este es para que el enemigo tragado no le haga perder vida
             if e == self.enemy_get:
                 pass
-        
+
 
             # aca es para todos los demas enemigos
             elif pygame.sprite.collide_rect(self, e) :
@@ -448,11 +448,16 @@ class Player(Entity):
                     self.contador_sin_perder_vida = self.contador_sin_perder_vida + 1
         return sigue_vivo
 
-    
+
     def perder_vida(self, datos):
         datos.vidas_restantes = datos.vidas_restantes - 1
         print("vida" + str(datos.vidas_restantes))
-    
+
+    def ganar_vida(self, datos):
+        datos.vidas_restantes = datos.vidas_restantes + 1
+        print("vida" + str(datos.vidas_restantes))
+
+
     def collide_gemas(self, gemas, entities, datos):
         for e in gemas:
             cogio_gema = False
@@ -463,8 +468,24 @@ class Player(Entity):
                 datos.puntaje = datos.puntaje + e.valor
                 entities.remove(e)
                 gemas.remove(e)
-            
+
         return False
+
+    def collide_corazon(self, corazon, entities, datos):
+        for e in corazon:
+            cogio_corazon = False
+
+            cogio_corazon= self.agarrarObjeto(e)
+
+            if(cogio_corazon == True):
+                datos.vidas_restantes = datos.vidas_restantes + 1
+            #    ganar_vida()
+                entities.remove(e)
+                corazon.remove(e)
+
+        return False
+
+
     #############################################################################################
 
     def beobserver(self, enemies, platforms, entities, level_width, level_high):

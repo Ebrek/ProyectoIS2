@@ -79,9 +79,29 @@ class Gemas(Entity):
 
     def update(self):
         pass
+################################################################################################
+
+class Corazon(Entity):
+    def __init__(self, x, y, w, h, image_path):
+        Entity.__init__(self)
+        self._image_origin = pygame.image.load(PATH + image_path)
+        self._image_origin = pygame.transform.scale(self._image_origin, (w, h))
+        self.image = self._image_origin
+        image_rect = None
+        try:
+            image_rect = IMAGE_SIZES[PATH + image_path]
+        except KeyError:
+            image_rect = crop(PATH + image_path, w, h)
+            IMAGE_SIZES[PATH + image_path] = image_rect
+        self.rect = pygame.Rect(x, y - h + 32, image_rect[0], image_rect[1])
+
+        self.valor = 20
+
+    def update(self):
+        pass
+
 #############################################################################################
 
 class ExitBlock(Platform):
     def __init__(self, x, y):
         Platform.__init__(self, x, y, "platform/18.png")
-
