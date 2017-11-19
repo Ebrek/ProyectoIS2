@@ -112,15 +112,17 @@ class Level():
             self.gemas.append(g)
             self.entities.add(g)
 
-
-
             #CORAZON
         if col == "C":
             c = Corazon(x, y, 32,32, "items/vida.png")
+
             self.corazon.append(c)
             self.entities.add(c)
 
-
+        if col == "W":
+            w = EnemyBoss(x, y)
+            self.enemies.append(w)
+            self.entities.add(w)
 
             ########################################################
 

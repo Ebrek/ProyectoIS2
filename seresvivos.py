@@ -183,6 +183,79 @@ class EnemySpider(Entity):
             entities.remove(self)
             self = None
 
+##################################################################################################
+class EnemyBoss(Entity):
+    def __init__(self, x, y):
+        Entity.__init__(self)
+        data = Conexion().obtener_ajustesgeneral()
+        self.vida = data[5]
+        self.xvel_ini = data[0]
+        self.yvel_ini = data[0]
+        self.follow = False
+        self.onGround = False
+        self._image_origin = pygame.image.load(PATH + "boss_sprites/sprite_boss00.png")
+        self._image_origin = pygame.transform.scale(self._image_origin, (256, 256)).convert_alpha()
+        self._image_toLeft = pygame.transform.flip(self._image_origin, True, False).convert_alpha()
+        self.image  = self._image_origin
+        image_rect = (self.image.get_rect().size)
+        self.image.convert()
+        self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
+    def update(self, platforms, enemies, entities, posX, posY, level_width, level_high):
+        self.xvel, self.yvel = self.xvel_ini, self.yvel_ini
+##        self.move_towards_player(posX, posY)
+        self.collide(self.xvel, 0, platforms)
+        self.collide(0, self.yvel, platforms)
+        if(self.rect.y > level_high or self.rect.right < 0 or self.rect.left > level_width):
+            self.perdervida(enemies, entities)
+
+#*    def move_towards_player(self, posX, posY):
+##        dist = math.hypot(self.rect.x - posX, self.rect.y - posY) #math.sqrt(dx*dx + dy*dy)
+##        if not self.follow:
+##            if dist < 200:
+##                self.follow = True
+##            else:
+##                return
+##        dx = posX - self.rect.x
+##        self.rect.y += 4.0
+##        if abs(self.rect.x - posX)>3:
+##            if dx > 0:
+##                self.image = self._image_toLeft
+##                self.rect.x +=self.xvel
+##            elif dx < 0:
+##                self.image = self._image_origin
+##                self.rect.x -=self.xvel
+
+    def observar(self, posX, posY, platforms, enemies, entities,  level_width, level_high):
+        self.update(platforms, enemies, entities, posX, posY, level_width, level_high)
+    def collide(self, xvel, yvel, platforms):
+        for p in platforms:
+            if pygame.sprite.collide_rect(self, p):
+                if abs(self.rect.right - p.rect.left) < abs(self.xvel)+1 and self.overlap((self.rect.top, self.rect.bottom),(p.rect.top, p.rect.bottom)):
+                    self.rect.right = p.rect.left
+                    self.xvel = 0
+                    #print ("Enemy collide right")
+                if abs(self.rect.left - p.rect.right) < abs(self.xvel)+1 and self.overlap((self.rect.top, self.rect.bottom),(p.rect.top, p.rect.bottom)):
+                    self.rect.left = p.rect.right
+                    self.xvel = 0
+                    #print ("Enemy collide left")
+                if abs(self.rect.bottom - p.rect.top) < abs(self.yvel)+1:
+                    self.rect.bottom = p.rect.top
+                    self.yvel = 0
+                if abs(self.rect.top - p.rect.bottom) < abs(self.yvel)+1:
+                    self.rect.top = p.rect.bottom
+                    self.yvel = 0
+                    #print ("Enemy collide top")
+    def overlap(self, t1,t2):
+        return t1[0]<=t2[1] and t2[0]<=t1[0]
+    def perdervida(self, enemies, entities):
+        self.vida = self.vida - 1
+        if self.vida < 1: #morir
+            enemies.remove(self)
+            entities.remove(self)
+            self = None
+
+
+########################################################################################################
 class Player(Entity):
     def __init__(self, x, y, image_path):
         Entity.__init__(self)
