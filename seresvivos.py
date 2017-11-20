@@ -272,8 +272,6 @@ class Player(Entity):
 
         image_rect = (32,32)#(self.image.get_rect().size)
         self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
-        self.tongue = 0
-
         self.enemy_get = None
 
 
@@ -373,8 +371,6 @@ class Player(Entity):
                     self.enemy_get.salir_disparado(self.lado)
                     self.espera = 0
                     self.agarrado = False
-                    if self.tongue <= 0:
-                        self.tongue = 100
                     ##print(self.tongue)
                     #self.enemy_get.update(platforms, 0, 0)
                     #setlf.screen.blit(self.enemy_get.image, ())
@@ -412,8 +408,6 @@ class Player(Entity):
                 self.image = self.imagenes_walk_izquierda[self.forma_walk[0]]
             else:
                 self.image = self.imagenes_walk_derecha[self.forma_walk[0]]
-        if (self.tongue >= 0):
-            self.tongue -= 1
         # increment in x direction
         self.rect.left += self.xvel
         # do x-axis collisions

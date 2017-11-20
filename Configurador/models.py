@@ -23,7 +23,7 @@ class Escenario(models.Model):
 	title = models.CharField(max_length=50)
 	mapa = models.FileField(upload_to='maps/')
 	nivel  = models.ForeignKey(Nivel, on_delete=models.CASCADE)
-	order = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+	orden = models.PositiveIntegerField(validators=[MinValueValidator(1)])
 
 	def __unicode__(self):
 		return self.title

@@ -3,9 +3,109 @@ from pygame import *
 from constantes import *
 from objetosestaticos import *
 from seresvivos import *
+from pantallas import GameMenu
+
+import json
+
+
+
+class Partida():
+    def __init__(self):
+        #para cambiar niveles cambiar el nombre a level (no duplicados)
+
+
+        self.player_settings = (32, 32, PATH + "froggy.png")
+
+        self.niveles_data = Conexion().listar_niveles()
+
+    def mostrar_pantalla_niveles(self):
+
+        niveles_funciones = {}
+
+        for element in self.niveles_data:
+            bg_music = element["bg_music"]
+            bg_image = element["bg_image"]
+            def load_level(param):
+                param.mainloop=False
+                self.cargar_nivel(element["id"], self.player_settings, PATH + bg_music, PATH + bg_image)
+            niveles_funciones[element["title"]] = load_level
+
+        screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), 0, 32)
+        '''
+        menu_items = ('Iniciar', 'Mostrar Creditos', 'Salir')
+        funcs = {'Iniciar': iniciar,
+                 'Mostrar Creditos' : mostrar_creditos,
+                 'Salir': sys.exit}
+        '''
+
+        pygame.display.set_caption("Froggy!")
+        timer = pygame.time.Clock()
+        gm = GameMenu(screen, niveles_funciones.keys(), niveles_funciones)
+        gm.run()
+
+    def pause():
+        pygame.event.clear()
+        while True:
+            for e in pygame.event.get():
+                if e.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if e.type == KEYDOWN and e.key == K_ESCAPE:
+                    return
+
+    def cargar_nivel(self, id_nivel, player_settings, bg_music, bg_image):
+
+        up = down = left = right = space = running = False
+        level = Level(id_nivel, player_settings, bg_music) #player_settings, PATH+'bg_music1.ogg')
+        done = play_again = False
+        timer = pygame.time.Clock()
+        while not (done or play_again):
+            timer.tick(60)
+            for e in pygame.event.get():
+                if e.type == QUIT:
+                    done = True
+                    pygame.quit()
+                    import sys
+                    sys.exit
+                if e.type == KEYDOWN and e.key == K_ESCAPE:
+                    paused = True#change for paused menu
+                    pause()
+                    up = down = left = right = space = running = False
+                    pygame.event.clear()
+                    break
+                if e.type == KEYDOWN and e.key == K_UP:
+                    up = True
+                if e.type == KEYDOWN and e.key == K_DOWN:
+                    down = True
+                if e.type == KEYDOWN and e.key == K_LEFT:
+                    left = True
+                if e.type == KEYDOWN and e.key == K_RIGHT:
+                    right = True
+                if e.type == KEYDOWN and e.key == K_SPACE:
+                    space = True
+                if e.type == KEYUP and e.key == K_UP:
+                    up = False
+                if e.type == KEYUP and e.key == K_DOWN:
+                    down = False
+                if e.type == KEYUP and e.key == K_RIGHT:
+                    right = False
+                if e.type == KEYUP and e.key == K_LEFT:
+                    left = False
+                if e.type == KEYUP and e.key == K_SPACE:
+                    space = False
+            if(level.update(up, down, left, right, space, running)==False):
+                play_again = True
+            pygame.display.update()
+        if(play_again):
+            self.cargar_nivel(id_nivel, player_settings, bg_music, bg_image)
+        else:
+            pygame.quit()
+            import sys
+            sys.exit
+
 
 class Level():
-    def __init__(self, level, player_settings, bg_music):
+    def __init__(self, id_nivel, player_settings, bg_music):
         self.screen = pygame.display.set_mode(DISPLAY, FLAGS, DEPTH)
         self.bg = pygame.Surface((32,32))
         self.bg.convert()
@@ -17,20 +117,27 @@ class Level():
         ########################################################nuevo
         self.gemas = []
 
+
         self.corazon = []
         ########################################################
-        x = y = 0
-        self.level = level
+
+
+        self.escenarios = [] # lista de mapas de nivel
+        escenarios = [] # lista de mapas de nivel
+        data = Conexion().listar_escenarios(id_nivel)
+        from constantes import PATH
+        for element in data:
+            with open(PATH+element["mapa"]) as json_file:
+                data_map=json.load(json_file)
+                escenarios.append(data_map)
+                print(data_map)
+
+        self.level = escenarios[0] #inicializar en uno
         # build the level
 
-        for row in level:
-            for col in row:
-                self.construir(x, y, player_settings, col)
-                x += 32
-            y += 32
-            x = 0
-        self.total_level_width  = len(level[0])*32
-        self.total_level_height = len(level)*32
+        self.total_level_width, self.total_level_height = 0 , 0
+        self.construir_mapa(self.level, player_settings)
+
 
         self.camera = Camera(Camera.complex_camera, self.total_level_width, self.total_level_height)
         self.entities.add(self.player)
@@ -42,10 +149,57 @@ class Level():
             print("no bg music")
 
         ####################################################################################################
-        self.vidas_inicio = 3
+
+        data = Conexion().obtener_ajustesgeneral()
+        
+        self.vidas_inicio = data["froggy_health"]
         self.letra_datos = 20
         self.datos = Datos_partida("items/gem_9.png", "items/corazon.jpg",self.letra_datos, self.vidas_inicio)
         ####################################################################################################
+
+    def construir_mapa(self, level, player_settings):
+        x = y = 0
+        for row in level:
+            for col in row:
+                self.construir(x, y, player_settings, col)
+                x += 32
+            y += 32
+            x = 0
+        self.total_level_width  = len(level[0])*32
+        self.total_level_height = len(level)*32
+
+    def update(self, up, down, left, right, space, running):
+        # draw background
+        for y in range(32):
+            for x in range(32):
+                self.screen.blit(self.bg, (x * 32, y * 32))
+
+        self.camera.update(self.player)
+        self.screen.fill([255, 255, 255])
+        self.screen.blit(self.backGround.image, self.backGround.rect)
+        # update player, draw everything else
+        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities,self.gemas, self.corazon, self.datos, self.total_level_width, self.total_level_height):
+            return False
+        for e in self.entities:
+            self.screen.blit(e.image, self.camera.apply(e))
+
+        ####################################################################################################
+        self.datos.update()
+        self.mostrarDatos()
+
+    def mostrarDatos(self):
+        ancho = 0
+
+        for d in self.datos.datos:
+            self.screen.blit(d, (400 + ancho,10))
+            ancho =  ancho + d.get_rect()[2] + 5
+        ####################################################################################################
+
+    def playmusic(self, file):
+        pygame.mixer.init()
+        pygame.mixer.music.load(file)
+        pygame.mixer.music.play(-1, 0.0)
+
 
     def construir(self, x, y, player_settings, col):
         if col == "1":
@@ -145,38 +299,6 @@ class Level():
         #player
         if col == "F":
             self.player = Player(x, y, player_settings[2])
-
-    def update(self, up, down, left, right, space, running):
-        # draw background
-        for y in range(32):
-            for x in range(32):
-                self.screen.blit(self.bg, (x * 32, y * 32))
-
-        self.camera.update(self.player)
-        self.screen.fill([255, 255, 255])
-        self.screen.blit(self.backGround.image, self.backGround.rect)
-        # update player, draw everything else
-        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities,self.gemas, self.corazon, self.datos, self.total_level_width, self.total_level_height):
-            return False
-        for e in self.entities:
-            self.screen.blit(e.image, self.camera.apply(e))
-
-        ####################################################################################################
-        self.datos.update()
-        self.mostrarDatos()
-
-    def mostrarDatos(self):
-        ancho = 0
-
-        for d in self.datos.datos:
-            self.screen.blit(d, (400 + ancho,10))
-            ancho =  ancho + d.get_rect()[2] + 5
-        ####################################################################################################
-
-    def playmusic(self, file):
-        pygame.mixer.init()
-        pygame.mixer.music.load(file)
-        pygame.mixer.music.play(-1, 0.0)
 
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_file, location, screen_sizes):

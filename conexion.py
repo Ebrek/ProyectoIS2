@@ -17,8 +17,9 @@ class Conexion():
         
     def listar_escenarios(self, nivel_id):
         c = conn.cursor()
-        c.execute("""SELECT id, title, mapa, order FROM Configurador_escenario 
-            WHERE nivel_id = (?) """, (nivel_id,) )
+        c.execute("""SELECT id, title, mapa, orden FROM Configurador_escenario
+            WHERE nivel_id = ? 
+            ORDER BY orden ASC""", (nivel_id,) )
         rows = c.fetchall()
         result = []
         for row in rows:

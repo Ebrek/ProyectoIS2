@@ -156,6 +156,9 @@ class GameMenu():
 def iniciar(param):
     param.mainloop=False
     print(param.mainloop)
+    from nivel import Partida
+    partida = Partida()
+    partida.mostrar_pantalla_niveles()
 def mostrar_creditos(param):
     print("Creditos")
 class Media_Screen():

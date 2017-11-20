@@ -23,7 +23,7 @@ def main():
     timer = pygame.time.Clock()
     gm = GameMenu(screen, funcs.keys(), funcs)
     gm.run()
-
+'''
     up = down = left = right = space = running = False
     #para cambiar niveles cambiar el nombre a level (no duplicados)
 
@@ -45,7 +45,7 @@ def main():
         "                                                                              S    3PPPPPPP222222222           22222222222222",
         "                                                                          3PPPPPPPP22222222222222222           22222222222222",
         "                                                                      !   22222222222222222222222222           22222222222222",
-        "             W                                       B               3PPPP22222222222222222222222222           22222222222222",
+        "                                                     B               3PPPP22222222222222222222222222           22222222222222",
         "                              PP                5PPPPPP7          0PP2222222222222222222222222222222           22222222222222",
         "                                        B G      666666             66662222222222222222222222222222           22222222222222",
         "                                      PPPPPP                            6666222222222222222222222222           22222222222222",
@@ -108,6 +108,10 @@ def pause():
                 sys.exit()
             if e.type == KEYDOWN and e.key == K_ESCAPE:
                 return
-
+'''
 if __name__ == '__main__':
-	main()
+    main()
+    data = Conexion().listar_escenarios(2)
+    from constantes import PATH
+    for element in data:
+        print(element["title"])
