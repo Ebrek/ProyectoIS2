@@ -5,6 +5,7 @@ import numpy, math
 from constantes import *
 from objetosestaticos import ExitBlock
 from conexion import Conexion
+from threading import Thread
 
 class EnemyMosquito(Entity):
     def __init__(self, x, y):
@@ -61,7 +62,8 @@ class EnemyMosquito(Entity):
         self.update(platforms, enemies, entities, posX, posY, level_width, level_high)
         pass
 
-    def collide(self, xvel, yvel, platforms):
+    def threaded_function(self,  platforms):
+        #print("desde"+str(desde)+"hasta"+ str(hasta) )
         for p in platforms:
             if pygame.sprite.collide_rect(self, p):
                 if abs(self.rect.right - p.rect.left) < abs(self.xvel) + 1:
@@ -78,8 +80,43 @@ class EnemyMosquito(Entity):
                 if abs(self.rect.top - p.rect.bottom) < abs(self.yvel) + 1:
                     self.rect.top = p.rect.bottom
                     self.yvel = 0
-                    #print("Enemy collide top")
 
+    def collide(self, xvel, yvel, platforms):
+    	threads_num = 1
+    	chunked_list = [platforms[i::threads_num] for i in range(threads_num)]
+    	threads_array = []
+    	for element in chunked_list:
+    		little_thread = Thread(target = self.threaded_function, args = (element,))
+    		threads_array.append(little_thread)
+    		little_thread.start()
+    	for element in threads_array:
+    		element.join()
+
+    	'''
+    	thread1 = Thread(target = self.threaded_function, args = (0, len(platforms)//2, platforms, ))
+    	thread2 = Thread(target = self.threaded_function, args = (len(platforms)//2+1, len(platforms)-1, platforms, ))
+    	thread1.start()
+    	thread2.start()
+    	thread1.join()
+    	thread2.join()
+        for p in platforms:
+            if pygame.sprite.collide_rect(self, p):
+                if abs(self.rect.right - p.rect.left) <= abs(self.xvel):
+                    self.rect.right = p.rect.left
+                    self.xvel = 0
+                    #print("Enemy collide right")
+                if abs(self.rect.left - p.rect.right) <= abs(self.xvel):
+                    self.rect.left = p.rect.right
+                    self.xvel = 0
+                    #print("Enemy collide left")
+                if abs(self.rect.bottom - p.rect.top) <= abs(self.yvel):
+                    self.rect.bottom = p.rect.top
+                    self.yvel = 0
+                if abs(self.rect.top - p.rect.bottom) <= abs(self.yvel):
+                    self.rect.top = p.rect.bottom
+                    self.yvel = 0
+                    #print("Enemy collide top")
+		'''
     def salir_disparado(self, dir):
         print("salidisparado")
         self.disparado = True
@@ -264,7 +301,7 @@ class Player(Entity):
         self.xvel = 0
         self.yvel = 0
         self.onGround = False
-
+        self.onExitBlock = False
         self._image_origin = pygame.image.load(PATH +"sprite_froggy0.png")
         self._image_origin = pygame.transform.scale(self._image_origin, (52, 52)).convert_alpha()
         self._image_toLeft = pygame.transform.flip(self._image_origin, True, False).convert_alpha()
@@ -326,7 +363,7 @@ class Player(Entity):
         if up:
             # only jump if on the ground
             if self.onGround:
-                self.yvel -= 9
+                self.yvel -= 9.3
                 try:
                     jumpsound= pygame.mixer.Sound(PATH+'sounds/Froggy_Jump.wav')
                     jumpsound.play()
@@ -457,11 +494,47 @@ class Player(Entity):
                 self.forma_walk = self.animacion.animarCompleta(self.imagenes_walk_izquierda, self.forma_walk)
                 self.image = self.imagenes_walk_izquierda[self.forma_walk[0]]
 
-    def collide(self, xvel, yvel, platforms):
+
+    def threaded_colide(self, xvel, yvel, platforms):
+        #print("desde"+str(desde)+"hasta"+ str(hasta) )
         for p in platforms:
             if pygame.sprite.collide_rect(self, p):
                 if isinstance(p, ExitBlock):
-                    pygame.event.post(pygame.event.Event(QUIT))
+                	#se va al siguiente nivel
+                    #pygame.event.post(pygame.event.Event(QUIT))
+                    self.onExitBlock = True
+                if xvel > 0:
+                    self.rect.right = p.rect.left
+                    #print("collide right")
+                if xvel < 0:
+                    self.rect.left = p.rect.right
+                    #print("collide left")
+                if yvel > 0:
+                    self.rect.bottom = p.rect.top
+                    self.onGround = True
+                    self.yvel = 0
+                if yvel < 0:
+                    self.rect.top = p.rect.bottom
+                    self.yvel = 0
+
+    def collide(self, xvel, yvel, platforms):
+        threads_num = 1
+        chunked_list = [platforms[i::threads_num] for i in range(threads_num)]
+        threads_array = []
+        for element in chunked_list:
+        	little_thread = Thread(target = self.threaded_colide, args = (xvel, yvel, element,))
+        	threads_array.append(little_thread)
+        	little_thread.start()
+        for element in threads_array:
+        	element.join()
+        ###
+        '''
+        for p in platforms:
+            if pygame.sprite.collide_rect(self, p):
+                if isinstance(p, ExitBlock):
+                	#se va al siguiente nivel
+                    #pygame.event.post(pygame.event.Event(QUIT))
+                    self.onExitBlock = True
                 if xvel > 0:
                     self.rect.right = p.rect.left
                     #print("collide right")
@@ -476,7 +549,7 @@ class Player(Entity):
                     self.rect.top = p.rect.bottom
                     self.yvel = 0
                     #print("collide top")
-
+        '''
     '''def collide_enemies(self, enemies, entities):
         for e in enemies:
             if pygame.sprite.collide_rect(self, e):

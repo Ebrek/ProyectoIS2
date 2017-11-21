@@ -13,7 +13,7 @@ def main():
     pygame.init()
 
 
-    screen = pygame.display.set_mode((640, 480), 0, 32)
+    screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), 0, 32)
     menu_items = ('Iniciar', 'Mostrar Creditos', 'Salir')
     funcs = {'Iniciar': iniciar,
              'Mostrar Creditos' : mostrar_creditos,
@@ -111,7 +111,3 @@ def pause():
 '''
 if __name__ == '__main__':
     main()
-    data = Conexion().listar_escenarios(2)
-    from constantes import PATH
-    for element in data:
-        print(element["title"])

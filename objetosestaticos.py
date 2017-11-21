@@ -47,7 +47,7 @@ class Decoration(Entity):
     def __init__(self, x, y, w, h, image_path):
         Entity.__init__(self)
         self._image_origin = pygame.image.load(PATH + image_path)
-        self._image_origin = pygame.transform.scale(self._image_origin, (w, h))
+        self._image_origin = pygame.transform.scale(self._image_origin, (w, h)).convert_alpha()
         self.image = self._image_origin
         image_rect = None
         try:
@@ -65,7 +65,7 @@ class Gemas(Entity):
     def __init__(self, x, y, w, h, image_path):
         Entity.__init__(self)
         self._image_origin = pygame.image.load(PATH + image_path)
-        self._image_origin = pygame.transform.scale(self._image_origin, (w, h))
+        self._image_origin = pygame.transform.scale(self._image_origin, (w, h)).convert_alpha()
         self.image = self._image_origin
         image_rect = None
         try:
@@ -85,7 +85,7 @@ class Corazon(Entity):
     def __init__(self, x, y, w, h, image_path):
         Entity.__init__(self)
         self._image_origin = pygame.image.load(PATH + image_path)
-        self._image_origin = pygame.transform.scale(self._image_origin, (w, h))
+        self._image_origin = pygame.transform.scale(self._image_origin, (w, h)).convert_alpha()
         self.image = self._image_origin
         image_rect = None
         try:

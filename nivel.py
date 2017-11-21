@@ -21,14 +21,22 @@ class Partida():
     def mostrar_pantalla_niveles(self):
 
         niveles_funciones = {}
-
+        def function_builder(id, bg_music, bg_image):
+            def function(param):
+                param.mainloop=False
+                self.cargar_nivel(id, self.player_settings, bg_music, bg_image)
+            return function
         for element in self.niveles_data:
             bg_music = element["bg_music"]
             bg_image = element["bg_image"]
             def load_level(param):
                 param.mainloop=False
                 self.cargar_nivel(element["id"], self.player_settings, PATH + bg_music, PATH + bg_image)
-            niveles_funciones[element["title"]] = load_level
+            niveles_funciones[element["title"]] = function_builder(element["id"], PATH + bg_music, PATH + bg_image)
+
+        def mini_function(param):
+            param.mainloop=False
+        niveles_funciones["Pantalla principal"] = mini_function
 
         screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), 0, 32)
         '''
@@ -56,7 +64,7 @@ class Partida():
     def cargar_nivel(self, id_nivel, player_settings, bg_music, bg_image):
 
         up = down = left = right = space = running = False
-        level = Level(id_nivel, player_settings, bg_music) #player_settings, PATH+'bg_music1.ogg')
+        level = Level(id_nivel, player_settings, bg_music, bg_image) #player_settings, PATH+'bg_music1.ogg')
         done = play_again = False
         timer = pygame.time.Clock()
         while not (done or play_again):
@@ -97,7 +105,8 @@ class Partida():
                 play_again = True
             pygame.display.update()
         if(play_again):
-            self.cargar_nivel(id_nivel, player_settings, bg_music, bg_image)
+            #self.cargar_nivel(id_nivel, player_settings, bg_music, bg_image)
+            pass
         else:
             pygame.quit()
             import sys
@@ -105,19 +114,17 @@ class Partida():
 
 
 class Level():
-    def __init__(self, id_nivel, player_settings, bg_music):
+    def __init__(self, id_nivel, player_settings, bg_music, bg_image):
         self.screen = pygame.display.set_mode(DISPLAY, FLAGS, DEPTH)
         self.bg = pygame.Surface((32,32))
         self.bg.convert()
         self.entities = pygame.sprite.Group()
-
+        self.player_settings = player_settings
         self.platforms = []
         self.decorations = []
         self.enemies = []
         ########################################################nuevo
         self.gemas = []
-
-
         self.corazon = []
         ########################################################
 
@@ -129,20 +136,19 @@ class Level():
         for element in data:
             with open(PATH+element["mapa"]) as json_file:
                 data_map=json.load(json_file)
-                escenarios.append(data_map)
-                print(data_map)
-
-        self.level = escenarios[0] #inicializar en uno
+                self.escenarios.append(data_map)
+        self.escenario_index = 0
+        self.level = self.escenarios[self.escenario_index] #inicializar en uno
         # build the level
 
         self.total_level_width, self.total_level_height = 0 , 0
-        self.construir_mapa(self.level, player_settings)
+        self.construir_mapa(self.level, self.player_settings)
 
 
-        self.camera = Camera(Camera.complex_camera, self.total_level_width, self.total_level_height)
-        self.entities.add(self.player)
+        #self.camera = Camera(Camera.complex_camera, self.total_level_width, self.total_level_height)
+        #self.entities.add(self.player)
 
-        self.backGround = Background(PATH+'platform/bg_jungle.png', [0,0], (800, 640))
+        self.backGround = Background(bg_image, [0,0], (WIN_WIDTH, WIN_HEIGHT))
         try:
             self.playmusic(bg_music)
         except Exception:
@@ -167,6 +173,9 @@ class Level():
             x = 0
         self.total_level_width  = len(level[0])*32
         self.total_level_height = len(level)*32
+        
+        self.camera = Camera(Camera.complex_camera, self.total_level_width, self.total_level_height)
+        self.entities.add(self.player)
 
     def update(self, up, down, left, right, space, running):
         # draw background
@@ -178,6 +187,23 @@ class Level():
         self.screen.fill([255, 255, 255])
         self.screen.blit(self.backGround.image, self.backGround.rect)
         # update player, draw everything else
+        if self.player.onExitBlock:
+            #wea de apasar nivel
+            self.escenario_index += 1
+            if self.escenario_index < len(self.escenarios):
+                print("construido")
+                self.entities = pygame.sprite.Group()
+                self.platforms = []
+                self.decorations = []
+                self.enemies = []
+                self.gemas = []
+                self.corazon = []
+
+                self.construir_mapa(self.escenarios[self.escenario_index],self.player_settings)
+                return;
+            else:
+                print("Ganasteeeeee")
+                return False
         if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities,self.gemas, self.corazon, self.datos, self.total_level_width, self.total_level_height):
             return False
         for e in self.entities:
@@ -304,7 +330,7 @@ class Background(pygame.sprite.Sprite):
     def __init__(self, image_file, location, screen_sizes):
         pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
         self.image = pygame.image.load(image_file)
-        self.image = pygame.transform.scale(self.image, screen_sizes)
+        self.image = pygame.transform.scale(self.image, screen_sizes).convert_alpha()
         self.rect = self.image.get_rect()
         self.rect.left, self.rect.top = location
 
@@ -321,7 +347,7 @@ class Datos_partida():
 
         # IMAGEN GEMA
         self._image_gema = pygame.image.load(PATH + image_path_gema)
-        self._image_gema = pygame.transform.scale(self._image_gema, (self.datos[0].get_rect()[3], self.datos[0].get_rect()[3]))
+        self._image_gema = pygame.transform.scale(self._image_gema, (self.datos[0].get_rect()[3], self.datos[0].get_rect()[3])).convert_alpha()
         self.datos.append( self._image_gema )
 
         # VIDAS INICIO
@@ -329,7 +355,7 @@ class Datos_partida():
 
         # IMAGEN VIDA
         self._image_vida = pygame.image.load(PATH + image_path_vida)
-        self._image_vida = pygame.transform.scale(self._image_vida, (self.datos[0].get_rect()[3], self.datos[0].get_rect()[3]))
+        self._image_vida = pygame.transform.scale(self._image_vida, (self.datos[0].get_rect()[3], self.datos[0].get_rect()[3])).convert_alpha()
         self.datos.append( self._image_vida )
 
         #self.screen.blit(imagenTextoPresent, (400, 10))

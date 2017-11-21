@@ -140,9 +140,9 @@ class GameMenu():
             # Redraw the background
             self.screen.fill(self.bg_color)
             image = pygame.image.load(PATH+"logo.png")
-            image = pygame.transform.scale(image,(450,200))
+            image = pygame.transform.scale(image,(450,200)).convert_alpha()
             image_width, image_height= image.get_size()
-            self.screen.blit(image,((WIN_WIDTH-image_width)/3,(WIN_HEIGHT-image_height)/6))
+            self.screen.blit(image,((WIN_WIDTH-image_width)/2,(WIN_HEIGHT-image_height)/6))
 
 
             for item in self.items:
@@ -159,6 +159,7 @@ def iniciar(param):
     from nivel import Partida
     partida = Partida()
     partida.mostrar_pantalla_niveles()
+    param.mainloop = True
 def mostrar_creditos(param):
     print("Creditos")
 class Media_Screen():
@@ -168,7 +169,7 @@ class Media_Screen():
     def wait_for_key(self):
         waiting = True
         while waiting:
-            self.timer.tick(60)
+            self.timer.tick(60) 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
