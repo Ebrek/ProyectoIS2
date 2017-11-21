@@ -6,6 +6,8 @@ from constantes import *
 from objetosestaticos import ExitBlock
 from conexion import Conexion
 from threading import Thread
+from random import randint
+
 
 class EnemyMosquito(Entity):
     def __init__(self, x, y):
@@ -245,6 +247,26 @@ class EnemyBoss(Entity):
         if(self.rect.y > level_high or self.rect.right < 0 or self.rect.left > level_width):
             self.perdervida(enemies, entities)
 
+#########################################################################################################################
+        if self.contar == 40:
+            self.lanzarEnemigo(enemies, entities, self.rect[0] , self.rect[1])
+            self.contar = 0
+            if self.xxx == 0:
+                self.lanzarEnemigo(enemies, entities, 10, 600)
+                self.xxx = 1
+        self.contar = self.contar + 1
+
+
+    def lanzarEnemigo(self, enemies, entities, x, y):
+        ### esto debe ser cambiado para usar la cabeza del boss :v 
+        lugar = randint(0, 2)
+        posicion =  [self.rect[3]*2/10,self.rect[3]*4/10,self.rect[3]*6/10]
+        q = EnemyMosquito( x- 20, y + posicion[lugar])
+        enemies.append(q)
+        entities.add(q)
+        q.salir_disparado('izquierda')
+#########################################################################################################################
+        
 #*    def move_towards_player(self, posX, posY):
 ##        dist = math.hypot(self.rect.x - posX, self.rect.y - posY) #math.sqrt(dx*dx + dy*dy)
 ##        if not self.follow:
@@ -569,6 +591,7 @@ class Player(Entity):
 
                 if self.agarrado == True:
                     self.enemy_get = e
+                    enemies.remove(e)
                     entities.remove(e)
 
             # este es para que el enemigo tragado no le haga perder vida
