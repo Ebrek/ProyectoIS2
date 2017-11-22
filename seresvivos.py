@@ -430,6 +430,7 @@ class Player(Entity):
 
         #franco
         if self.agarrado == True:
+                                # Con esto se espera un tiempo hasta poder lanzar el mosquito
             self.espera = self.espera + 1
             #print(self.espera)
 
@@ -595,9 +596,12 @@ class Player(Entity):
 
 
                 if self.agarrado == True:
+                    # Se remueve el mosquito para que paresca que es comido y se agrega a enemy_get
                     self.enemy_get = e
+
                     enemies.remove(e)
                     entities.remove(e)
+                    self.espera = 0
 
             # este es para que el enemigo tragado no le haga perder vida
             if e == self.enemy_get:
@@ -666,7 +670,7 @@ class Player(Entity):
             cogio_feather= self.agarrarObjeto(e)
 
             if(cogio_feather == True):
-                
+
                 gravedad = gravedad + 3
 
                 entities.remove(e)
