@@ -419,6 +419,7 @@ class Player(Entity):
 
         #franco
         if self.agarrado == True:
+                                # Con esto se espera un tiempo hasta poder lanzar el mosquito
             self.espera = self.espera + 1
             #print(self.espera)
 
