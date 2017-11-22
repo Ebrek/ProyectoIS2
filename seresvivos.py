@@ -584,6 +584,7 @@ class Player(Entity):
                     self.enemy_get = e
                     enemies.remove(e)
                     entities.remove(e)
+                    self.espera = 0
 
             # este es para que el enemigo tragado no le haga perder vida
             if e == self.enemy_get:
