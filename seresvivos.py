@@ -241,7 +241,7 @@ class EnemyBoss(Entity):
         image_rect = (self.image.get_rect().size)
         self.image.convert()
         self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
-        self.xxx = 0
+        
     def update(self, platforms, enemies, entities, posX, posY, level_width, level_high):
         self.xvel, self.yvel = self.xvel_ini, self.yvel_ini
 ##        self.move_towards_player(posX, posY)
