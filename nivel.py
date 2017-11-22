@@ -383,6 +383,14 @@ class Level():
                 element = Corazon(x, y, obj_sprite["w"], obj_sprite["h"], ITEM_PATH + obj_sprite["image"])
                 self.corazon.append(element)
                 self.entities.add(element)
+            elif obj_sprite["type"] == EnemyBoss:
+                element = EnemyBoss(x, y)
+                self.enemies.append(element)
+                self.entities.add(element)
+            elif obj_sprite["type"] == None:
+                pass
+            else:
+                print("no se encontro: " + obj_sprite["type"])
         except Exception as e:
             raise e
 
