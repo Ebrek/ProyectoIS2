@@ -114,7 +114,7 @@ class GameMenu():
         self.mainloop = True
         while self.mainloop:
 
-            self.clock.tick(50)
+            self.clock.tick(FPS_RATE)
 
             mposx, mposy = pygame.mouse.get_pos()
 
@@ -169,7 +169,7 @@ class Media_Screen():
     def wait_for_key(self):
         waiting = True
         while waiting:
-            self.timer.tick(60) 
+            self.timer.tick(FPS_RATE) 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False

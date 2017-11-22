@@ -68,7 +68,7 @@ class Partida():
         done = play_again = False
         timer = pygame.time.Clock()
         while not (done or play_again):
-            timer.tick(60)
+            timer.tick(FPS_RATE)
             for e in pygame.event.get():
                 if e.type == QUIT:
                     done = True
@@ -208,7 +208,10 @@ class Level():
             return False
         for e in self.entities:
             self.screen.blit(e.image, self.camera.apply(e))
-
+        '''
+        for e in self.entities:
+            self.screen.blit(e.image, self.camera.apply(e))
+        '''
         ####################################################################################################
         self.datos.update()
         self.mostrarDatos()

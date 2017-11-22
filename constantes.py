@@ -1,4 +1,6 @@
 import pygame
+from PIL import Image, ImageOps
+import numpy, math
 
 WIN_WIDTH = 800
 WIN_HEIGHT = 640
@@ -15,6 +17,8 @@ DEPTH = 32
 FLAGS = 0
 CAMERA_SLACK = 30
 
+
+FPS_RATE = 60
 IMAGE_SIZES = {}
 IMAGES = {}
 PATH = "Resources/"
@@ -50,3 +54,19 @@ class Camera(object):
         t = min(0, t)                           # stop scrolling at the top
         return pygame.Rect(l, t, w, h)
 
+def crop(image_name, rx, ry):
+        pil_image = Image.open(image_name)
+        size = (pil_image.width, pil_image.height)
+        np_array = numpy.array(pil_image)
+        blank_px = [255, 255, 255, 0]
+        mask = np_array != blank_px
+        coords = numpy.argwhere(mask)
+        try:
+            x0, y0, z0 = coords.min(axis=0)
+            x1, y1, z1 = coords.max(axis=0) + 1
+            cropped_box = np_array[x0:x1, y0:y1, z0:z1]
+            pil_image = Image.fromarray(cropped_box, 'RGBA')
+        except Exception:
+            pass
+        print(image_name + str((pil_image.width, pil_image.height)))
+        return (pil_image.width * rx / size[0], pil_image.height * ry / size[1])

@@ -10,6 +10,7 @@ from nivel import *
 
 def main():
     global cameraX, cameraY
+    pygame.mixer.pre_init(44100, -16, 2, 2048)
     pygame.init()
 
 

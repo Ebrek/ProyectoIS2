@@ -7,7 +7,7 @@ from objetosestaticos import ExitBlock
 from conexion import Conexion
 from threading import Thread
 from random import randint
-
+import multiprocessing
 
 class EnemyMosquito(Entity):
     def __init__(self, x, y):
@@ -19,13 +19,31 @@ class EnemyMosquito(Entity):
         self.yvel_ini = data["mosquito_speed_y"]
         self.follow = False
         self.onGround = False
-        self._image_origin = pygame.image.load(PATH + "mosquito1.png")
-        self._image_origin = pygame.transform.scale(self._image_origin, (32, 32)).convert_alpha()
-        self._image_toLeft = pygame.transform.flip(self._image_origin, True, False).convert_alpha()
-        self.image = self._image_origin
-        image_rect = (self.image.get_rect().size)
-        self.image.convert()
+        image_path = "mosquito1.png"
+        image_rect = None
+        w, h = 32, 32
+        try:
+            image_rect = IMAGE_SIZES[PATH + image_path]
+            self._image_origin = IMAGES[(PATH + image_path, w, h)]
+            self._image_toLeft = IMAGES[(PATH + image_path + "-ToLeft", w, h)]
+        except KeyError:
+            image_rect = crop(PATH + image_path, w, h)
+            IMAGE_SIZES[PATH + image_path] = image_rect
+            if (PATH + image_path, w, h) not in IMAGES:
+                self._image_origin = pygame.image.load(PATH + image_path)
+                self._image_origin = pygame.transform.scale(self._image_origin, (w, h)).convert_alpha()
+                self._image_toLeft = pygame.transform.flip(self._image_origin, True, False).convert_alpha()
+                IMAGES[(PATH + image_path, w, h)] = self._image_origin
+                IMAGES[(PATH + image_path + "-ToLeft", w, h)] = self._image_toLeft
         self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
+
+        #self._image_origin = pygame.image.load(PATH + "mosquito1.png")
+        #self._image_origin = pygame.transform.scale(self._image_origin, (32, 32))
+        #self._image_toLeft = pygame.transform.flip(self._image_origin, True, False).convert_alpha()
+        self.image = self._image_origin
+        #image_rect = (self.image.get_rect().size)
+        #self.image.convert()
+        #self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
         self.disparado = False
     def update(self, platforms, enemies, entities, posX, posY, level_width, level_high):
         if(not self.disparado):
@@ -64,8 +82,7 @@ class EnemyMosquito(Entity):
         self.update(platforms, enemies, entities, posX, posY, level_width, level_high)
         pass
 
-    def threaded_function(self,  platforms):
-        #print("desde"+str(desde)+"hasta"+ str(hasta) )
+    def collide(self, xvel, yvel, platforms):
         for p in platforms:
             if pygame.sprite.collide_rect(self, p):
                 if abs(self.rect.right - p.rect.left) < abs(self.xvel) + 1:
@@ -83,42 +100,6 @@ class EnemyMosquito(Entity):
                     self.rect.top = p.rect.bottom
                     self.yvel = 0
 
-    def collide(self, xvel, yvel, platforms):
-    	threads_num = 1
-    	chunked_list = [platforms[i::threads_num] for i in range(threads_num)]
-    	threads_array = []
-    	for element in chunked_list:
-    		little_thread = Thread(target = self.threaded_function, args = (element,))
-    		threads_array.append(little_thread)
-    		little_thread.start()
-    	for element in threads_array:
-    		element.join()
-
-    	'''
-    	thread1 = Thread(target = self.threaded_function, args = (0, len(platforms)//2, platforms, ))
-    	thread2 = Thread(target = self.threaded_function, args = (len(platforms)//2+1, len(platforms)-1, platforms, ))
-    	thread1.start()
-    	thread2.start()
-    	thread1.join()
-    	thread2.join()
-        for p in platforms:
-            if pygame.sprite.collide_rect(self, p):
-                if abs(self.rect.right - p.rect.left) <= abs(self.xvel):
-                    self.rect.right = p.rect.left
-                    self.xvel = 0
-                    #print("Enemy collide right")
-                if abs(self.rect.left - p.rect.right) <= abs(self.xvel):
-                    self.rect.left = p.rect.right
-                    self.xvel = 0
-                    #print("Enemy collide left")
-                if abs(self.rect.bottom - p.rect.top) <= abs(self.yvel):
-                    self.rect.bottom = p.rect.top
-                    self.yvel = 0
-                if abs(self.rect.top - p.rect.bottom) <= abs(self.yvel):
-                    self.rect.top = p.rect.bottom
-                    self.yvel = 0
-                    #print("Enemy collide top")
-		'''
     def salir_disparado(self, dir):
         print("salidisparado")
         self.disparado = True
@@ -161,13 +142,32 @@ class EnemySpider(Entity):
         self.yvel_ini = data["spider_speed_y"]
         self.follow = False
         self.onGround = False
-        self._image_origin = pygame.image.load(PATH + "spider1.png")
-        self._image_origin = pygame.transform.scale(self._image_origin, (32, 32)).convert_alpha()
-        self._image_toLeft = pygame.transform.flip(self._image_origin, True, False).convert_alpha()
-        self.image  = self._image_origin
-        image_rect = (self.image.get_rect().size)
-        self.image.convert()
+
+        image_path = "spider1.png"
+        image_rect = None
+        w, h = 32, 32
+        try:
+            image_rect = IMAGE_SIZES[PATH + image_path]
+            self._image_origin = IMAGES[(PATH + image_path, w, h)]
+            self._image_toLeft = IMAGES[(PATH + image_path + "-ToLeft", w, h)]
+        except KeyError:
+            image_rect = crop(PATH + image_path, w, h)
+            IMAGE_SIZES[PATH + image_path] = image_rect
+            if (PATH + image_path, w, h) not in IMAGES:
+                self._image_origin = pygame.image.load(PATH + image_path)
+                self._image_origin = pygame.transform.scale(self._image_origin, (w, h)).convert_alpha()
+                self._image_toLeft = pygame.transform.flip(self._image_origin, True, False).convert_alpha()
+                IMAGES[(PATH + image_path, w, h)] = self._image_origin
+                IMAGES[(PATH + image_path + "-ToLeft", w, h)] = self._image_toLeft
         self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
+
+        #self._image_origin = pygame.image.load(PATH + "spider1.png")
+        #self._image_origin = pygame.transform.scale(self._image_origin, (32, 32)).convert_alpha()
+        #self._image_toLeft = pygame.transform.flip(self._image_origin, True, False).convert_alpha()
+        self.image  = self._image_origin
+        #image_rect = (self.image.get_rect().size)
+        #self.image.convert()
+        #self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
     def update(self, platforms, enemies, entities, posX, posY, level_width, level_high):
         self.xvel, self.yvel = self.xvel_ini, self.yvel_ini
         self.move_towards_player(posX, posY)
@@ -328,7 +328,7 @@ class Player(Entity):
         self._image_origin = pygame.transform.scale(self._image_origin, (52, 52)).convert_alpha()
         self._image_toLeft = pygame.transform.flip(self._image_origin, True, False).convert_alpha()
         self.image  = self._image_origin
-
+        self.jumpsound = pygame.mixer.Sound(PATH+'sounds/Froggy_Jump.wav')
         image_rect = (32,32)#(self.image.get_rect().size)
         self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
         self.enemy_get = None
@@ -387,8 +387,9 @@ class Player(Entity):
             if self.onGround:
                 self.yvel -= 9.3
                 try:
-                    jumpsound= pygame.mixer.Sound(PATH+'sounds/Froggy_Jump.wav')
-                    jumpsound.play()
+                    self.jumpsound.stop()
+                    self.jumpsound.play()
+
                 except Exception:
                     print("no audio")
         if down:
@@ -516,9 +517,7 @@ class Player(Entity):
                 self.forma_walk = self.animacion.animarCompleta(self.imagenes_walk_izquierda, self.forma_walk)
                 self.image = self.imagenes_walk_izquierda[self.forma_walk[0]]
 
-
-    def threaded_colide(self, xvel, yvel, platforms):
-        #print("desde"+str(desde)+"hasta"+ str(hasta) )
+    def collide(self, xvel, yvel, platforms):
         for p in platforms:
             if pygame.sprite.collide_rect(self, p):
                 if isinstance(p, ExitBlock):
@@ -538,17 +537,6 @@ class Player(Entity):
                 if yvel < 0:
                     self.rect.top = p.rect.bottom
                     self.yvel = 0
-
-    def collide(self, xvel, yvel, platforms):
-        threads_num = 1
-        chunked_list = [platforms[i::threads_num] for i in range(threads_num)]
-        threads_array = []
-        for element in chunked_list:
-        	little_thread = Thread(target = self.threaded_colide, args = (xvel, yvel, element,))
-        	threads_array.append(little_thread)
-        	little_thread.start()
-        for element in threads_array:
-        	element.join()
         ###
         '''
         for p in platforms:
@@ -651,12 +639,33 @@ class Player(Entity):
 
     #############################################################################################
 
-    def beobserver(self, enemies, platforms, entities, level_width, level_high):
+
+    def threaded_beobserved(self,  enemies, platforms, entities, level_width, level_high):
+        #print("desde"+str(desde)+"hasta"+ str(hasta) )
         for q in enemies:
             if isinstance(q, EnemyMosquito):
                 q.observar(self.rect.x, self.rect.y, platforms, enemies, entities, level_width, level_high)
             else:
                 q.observar(self.rect.x, self.rect.y, platforms, enemies, entities, level_width, level_high)
+
+    def beobserver(self, enemies, platforms, entities, level_width, level_high):
+    	num_cores = multiprocessing.cpu_count()
+    	threads_num = min(num_cores,len(enemies))
+    	chunked_list = [enemies[i::threads_num] for i in range(threads_num)]
+    	threads_array = []
+    	for element in chunked_list:
+    		little_thread = Thread(target = self.threaded_beobserved, args = (element, platforms, entities, level_width, level_high))
+    		threads_array.append(little_thread)
+    		little_thread.start()
+    	for element in threads_array:
+    		element.join()
+    	'''	
+        for q in enemies:
+            if isinstance(q, EnemyMosquito):
+                q.observar(self.rect.x, self.rect.y, platforms, enemies, entities, level_width, level_high)
+            else:
+                q.observar(self.rect.x, self.rect.y, platforms, enemies, entities, level_width, level_high)
+        '''
 
 
     def agarrarObjeto(self, objeto):
