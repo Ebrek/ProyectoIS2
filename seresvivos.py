@@ -9,14 +9,19 @@ from threading import Thread
 from random import randint
 import multiprocessing
 
+AUX = Conexion().obtener_ajustesgeneral()
+MOSQUITO_VIDA = AUX["mosquito_health"]
+MOSQUITO_xvel_ini = AUX["mosquito_speed_x"]
+MOSQUITO_yvel_ini = AUX["mosquito_speed_y"]
+
 class EnemyMosquito(Entity):
     def __init__(self, x, y):
         Entity.__init__(self)
-        data = Conexion().obtener_ajustesgeneral()
-        self.vida=data["mosquito_health"]
+        #data = Conexion().obtener_ajustesgeneral()
+        self.vida=MOSQUITO_VIDA#data["mosquito_health"]
 
-        self.xvel_ini = data["mosquito_speed_x"]
-        self.yvel_ini = data["mosquito_speed_y"]
+        self.xvel_ini = MOSQUITO_xvel_ini#data["mosquito_speed_x"]
+        self.yvel_ini = MOSQUITO_yvel_ini#data["mosquito_speed_y"]
         self.follow = False
         self.onGround = False
         image_path = "mosquito1.png"
@@ -227,9 +232,10 @@ class EnemyBoss(Entity):
     def __init__(self, x, y):
         Entity.__init__(self)
         data = Conexion().obtener_ajustesgeneral()
-        self.vida = data[5]
-        self.xvel_ini = data[0]
-        self.yvel_ini = data[0]
+        self.vida=data["mosquito_health"]
+        self.contar = 0
+        self.xvel_ini = data["mosquito_speed_x"]
+        self.yvel_ini = data["mosquito_speed_y"]
         self.follow = False
         self.onGround = False
         self._image_origin = pygame.image.load(PATH + "boss_sprites/sprite_boss00.png")
@@ -239,6 +245,7 @@ class EnemyBoss(Entity):
         image_rect = (self.image.get_rect().size)
         self.image.convert()
         self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
+        self.xxx = 0
     def update(self, platforms, enemies, entities, posX, posY, level_width, level_high):
         self.xvel, self.yvel = self.xvel_ini, self.yvel_ini
 ##        self.move_towards_player(posX, posY)
@@ -252,7 +259,7 @@ class EnemyBoss(Entity):
             self.lanzarEnemigo(enemies, entities, self.rect[0] , self.rect[1])
             self.contar = 0
             if self.xxx == 0:
-                self.lanzarEnemigo(enemies, entities, 10, 600)
+                self.lanzarEnemigo(enemies, entities, self.rect[0] , self.rect[1])
                 self.xxx = 1
         self.contar = self.contar + 1
 
@@ -261,7 +268,8 @@ class EnemyBoss(Entity):
         ### esto debe ser cambiado para usar la cabeza del boss :v 
         lugar = randint(0, 2)
         posicion =  [self.rect[3]*2/10,self.rect[3]*4/10,self.rect[3]*6/10]
-        q = EnemyMosquito( x- 20, y + posicion[lugar])
+        q = EnemyMosquito( x- 50, y + posicion[lugar])
+        q.follow = True
         enemies.append(q)
         entities.add(q)
         q.salir_disparado('izquierda')
@@ -329,6 +337,7 @@ class Player(Entity):
         self._image_toLeft = pygame.transform.flip(self._image_origin, True, False).convert_alpha()
         self.image  = self._image_origin
         self.jumpsound = pygame.mixer.Sound(PATH+'sounds/Froggy_Jump.wav')
+        self.punchedsound = pygame.mixer.Sound(PATH+'sounds/punch.wav')
         image_rect = (32,32)#(self.image.get_rect().size)
         self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
         self.enemy_get = None
@@ -602,6 +611,10 @@ class Player(Entity):
 
 
     def perder_vida(self, datos):
+        try:
+            self.punchedsound.play()
+        except Exception:
+            print("no audio")
         datos.vidas_restantes = datos.vidas_restantes - 1
         print("vida" + str(datos.vidas_restantes))
 
@@ -650,6 +663,12 @@ class Player(Entity):
                 q.observar(self.rect.x, self.rect.y, platforms, enemies, entities, level_width, level_high)
 
     def beobserver(self, enemies, platforms, entities, level_width, level_high):
+        for q in enemies:
+            if isinstance(q, EnemyMosquito):
+                q.observar(self.rect.x, self.rect.y, platforms, enemies, entities, level_width, level_high)
+            else:
+                q.observar(self.rect.x, self.rect.y, platforms, enemies, entities, level_width, level_high)
+        '''
     	num_cores = multiprocessing.cpu_count()
     	threads_num = min(num_cores,len(enemies))
     	chunked_list = [enemies[i::threads_num] for i in range(threads_num)]
@@ -661,12 +680,6 @@ class Player(Entity):
     	for element in threads_array:
     		element.join()
     	'''	
-        for q in enemies:
-            if isinstance(q, EnemyMosquito):
-                q.observar(self.rect.x, self.rect.y, platforms, enemies, entities, level_width, level_high)
-            else:
-                q.observar(self.rect.x, self.rect.y, platforms, enemies, entities, level_width, level_high)
-        '''
 
 
     def agarrarObjeto(self, objeto):
