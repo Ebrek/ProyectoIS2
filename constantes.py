@@ -17,6 +17,8 @@ DEPTH = 32
 FLAGS = 0
 CAMERA_SLACK = 30
 
+gravedad= 9.3
+
 
 from conexion import Conexion
 AJUSTES_GENERALES = Conexion().obtener_ajustesgeneral()

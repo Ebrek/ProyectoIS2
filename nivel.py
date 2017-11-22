@@ -126,6 +126,8 @@ class Level():
         ########################################################nuevo
         self.gemas = []
         self.corazon = []
+        self.feather= []
+
         ########################################################
 
 
@@ -158,7 +160,7 @@ class Level():
 
         self.vidas_inicio = FROGGY_VIDA
         self.letra_datos = 20
-        self.datos = Datos_partida("items/gem_9.png", "items/corazon.jpg",self.letra_datos, self.vidas_inicio)
+        self.datos = Datos_partida("items/gem_9.png", "items/corazon.jpg","items/feather.png",self.letra_datos, self.vidas_inicio)
         ####################################################################################################
 
     def construir_mapa(self, level, player_settings):
@@ -171,7 +173,7 @@ class Level():
             x = 0
         self.total_level_width  = len(level[0])*32
         self.total_level_height = len(level)*32
-        
+
         self.camera = Camera(Camera.complex_camera, self.total_level_width, self.total_level_height)
         self.entities.add(self.player)
 
@@ -196,13 +198,14 @@ class Level():
                 self.enemies = []
                 self.gemas = []
                 self.corazon = []
+                self.feather=[]
 
                 self.construir_mapa(self.escenarios[self.escenario_index],self.player_settings)
                 return;
             else:
                 print("Ganasteeeeee")
                 return False
-        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities,self.gemas, self.corazon, self.datos, self.total_level_width, self.total_level_height):
+        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities,self.gemas, self.corazon, self.feather, self.datos, self.total_level_width, self.total_level_height):
             return False
         for e in self.entities:
             self.screen.blit(e.image, self.camera.apply(e))
@@ -300,6 +303,14 @@ class Level():
             self.corazon.append(c)
             self.entities.add(c)
 
+        if col == "V":
+            f = Feather(x, y, 32,32, "items/feather.png")
+
+            self.feather.append(f)
+            self.entities.add(f)
+
+
+
         if col == "W":
             w = EnemyBoss(x, y)
             self.enemies.append(w)
@@ -337,7 +348,7 @@ class Background(pygame.sprite.Sprite):
 
 
 class Datos_partida():
-    def __init__(self, image_path_gema, image_path_vida, letra_datos, vidas_inicio):
+    def __init__(self, image_path_gema, image_path_vida, image_path_feather, letra_datos, vidas_inicio):
         self.puntaje = 0
         self.vidas_restantes = vidas_inicio
         self.datos = []
@@ -358,6 +369,12 @@ class Datos_partida():
         self._image_vida = pygame.image.load(PATH + image_path_vida)
         self._image_vida = pygame.transform.scale(self._image_vida, (self.datos[0].get_rect()[3], self.datos[0].get_rect()[3])).convert_alpha()
         self.datos.append( self._image_vida )
+
+        #imagen Feather
+        self._image_feather = pygame.image.load(PATH + image_path_gema)
+        self._image_feather = pygame.transform.scale(self._image_feather, (self.datos[0].get_rect()[3], self.datos[0].get_rect()[3])).convert_alpha()
+        self.datos.append( self._image_feather )
+
 
         #self.screen.blit(imagenTextoPresent, (400, 10))
         #self.screen.blit(imagenTextoPresent, (400 + imagenTextoPresent.get_rect()[2], 10))

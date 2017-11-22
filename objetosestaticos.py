@@ -28,7 +28,7 @@ class Platform(Entity):
 class Decoration(Entity):
     def __init__(self, x, y, w, h, image_path):
         Entity.__init__(self)
-        
+
         image_rect = None
         try:
             image_rect = IMAGE_SIZES[PATH + image_path]
@@ -70,6 +70,28 @@ class Gemas(Entity):
 
 
 class Corazon(Entity):
+    def __init__(self, x, y, w, h, image_path):
+        Entity.__init__(self)
+        image_rect = None
+        try:
+            image_rect = IMAGE_SIZES[PATH + image_path]
+            self.image = IMAGES[(PATH + image_path, w, h)]
+        except KeyError:
+            image_rect = crop(PATH + image_path, w, h)
+            IMAGE_SIZES[PATH + image_path] = image_rect
+            if (PATH + image_path, w, h) not in IMAGES:
+                self.image = pygame.image.load(PATH + image_path)
+                self.image = pygame.transform.scale(self.image, (w, h)).convert_alpha()
+                IMAGES[(PATH + image_path, w, h)] = self.image
+        self.rect = pygame.Rect(x, y - h + 32, image_rect[0], image_rect[1])
+
+        self.valor = 20
+
+    def update(self):
+        pass
+
+###############################################################################################
+class Feather(Entity):
     def __init__(self, x, y, w, h, image_path):
         Entity.__init__(self)
         image_rect = None
