@@ -239,6 +239,8 @@ class EnemyBoss(Entity):
         image_rect = (self.image.get_rect().size)
         self.image.convert()
         self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
+
+        self.contar = 0
     def update(self, platforms, enemies, entities, posX, posY, level_width, level_high):
         self.xvel, self.yvel = self.xvel_ini, self.yvel_ini
 ##        self.move_towards_player(posX, posY)
@@ -251,9 +253,6 @@ class EnemyBoss(Entity):
         if self.contar == 40:
             self.lanzarEnemigo(enemies, entities, self.rect[0] , self.rect[1])
             self.contar = 0
-            if self.xxx == 0:
-                self.lanzarEnemigo(enemies, entities, 10, 600)
-                self.xxx = 1
         self.contar = self.contar + 1
 
 
@@ -261,7 +260,7 @@ class EnemyBoss(Entity):
         ### esto debe ser cambiado para usar la cabeza del boss :v 
         lugar = randint(0, 2)
         posicion =  [self.rect[3]*2/10,self.rect[3]*4/10,self.rect[3]*6/10]
-        q = EnemyMosquito( x- 20, y + posicion[lugar])
+        q = EnemyMosquito( 50, 80)
         enemies.append(q)
         entities.add(q)
         q.salir_disparado('izquierda')
