@@ -249,7 +249,7 @@ class EnemyBoss(Entity):
         image_rect = (self.image.get_rect().size)
         self.image.convert()
         self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
-        
+
     def update(self, platforms, enemies, entities, posX, posY, level_width, level_high):
         self.xvel, self.yvel = self.xvel_ini, self.yvel_ini
 ##        self.move_towards_player(posX, posY)
@@ -331,6 +331,7 @@ class Player(Entity):
         Entity.__init__(self)
         self.counter=0
         self.counter_lengua=0
+        self.contar=0
         self.xvel = 0
         self.yvel = 0
         self.onGround = False
@@ -665,6 +666,7 @@ class Player(Entity):
             cogio_feather= self.agarrarObjeto(e)
 
             if(cogio_feather == True):
+                
                 gravedad = gravedad + 3
 
                 entities.remove(e)
