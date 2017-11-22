@@ -4,15 +4,11 @@ from PIL import Image, ImageOps
 import numpy, math
 from constantes import *
 from objetosestaticos import ExitBlock
-from conexion import Conexion
 from threading import Thread
 from random import randint
 import multiprocessing
 
-AUX = Conexion().obtener_ajustesgeneral()
-MOSQUITO_VIDA = AUX["mosquito_health"]
-MOSQUITO_xvel_ini = AUX["mosquito_speed_x"]
-MOSQUITO_yvel_ini = AUX["mosquito_speed_y"]
+
 
 class EnemyMosquito(Entity):
     def __init__(self, x, y):
@@ -142,9 +138,9 @@ class EnemySpider(Entity):
     def __init__(self, x, y):
         Entity.__init__(self)
         data = Conexion().obtener_ajustesgeneral()
-        self.vida = data["spider_health"]
-        self.xvel_ini = data["spider_speed_x"]
-        self.yvel_ini = data["spider_speed_y"]
+        self.vida = SPIDER_VIDA
+        self.xvel_ini = SPIDER_xvel_ini
+        self.yvel_ini = SPIDER_yvel_ini
         self.follow = False
         self.onGround = False
 

@@ -18,6 +18,18 @@ FLAGS = 0
 CAMERA_SLACK = 30
 
 
+from conexion import Conexion
+AJUSTES_GENERALES = Conexion().obtener_ajustesgeneral()
+MOSQUITO_VIDA = AJUSTES_GENERALES["mosquito_health"]
+MOSQUITO_xvel_ini = AJUSTES_GENERALES["mosquito_speed_x"]
+MOSQUITO_yvel_ini = AJUSTES_GENERALES["mosquito_speed_y"]
+
+SPIDER_VIDA = AJUSTES_GENERALES["spider_health"]
+SPIDER_xvel_ini = AJUSTES_GENERALES["spider_speed_x"]
+SPIDER_yvel_ini = AJUSTES_GENERALES["spider_speed_y"]
+
+FROGGY_VIDA = AJUSTES_GENERALES["froggy_health"]
+
 FPS_RATE = 60
 IMAGE_SIZES = {}
 IMAGES = {}

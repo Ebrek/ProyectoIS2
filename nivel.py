@@ -156,9 +156,7 @@ class Level():
 
         ####################################################################################################
 
-        data = Conexion().obtener_ajustesgeneral()
-        
-        self.vidas_inicio = data["froggy_health"]
+        self.vidas_inicio = FROGGY_VIDA
         self.letra_datos = 20
         self.datos = Datos_partida("items/gem_9.png", "items/corazon.jpg",self.letra_datos, self.vidas_inicio)
         ####################################################################################################
