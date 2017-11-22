@@ -254,9 +254,6 @@ class EnemyBoss(Entity):
         if self.contar == 40:
             self.lanzarEnemigo(enemies, entities, self.rect[0] , self.rect[1])
             self.contar = 0
-            if self.xxx == 0:
-                self.lanzarEnemigo(enemies, entities, self.rect[0] , self.rect[1])
-                self.xxx = 1
         self.contar = self.contar + 1
 
 
