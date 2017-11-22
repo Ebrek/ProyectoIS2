@@ -425,6 +425,7 @@ class Player(Entity):
                     ####### ahora puse que tenga que tenerlo
                 if space== True:
                     #print('xxxxxxxxxxxxxxxxxx')
+                    enemies.append(self.enemy_get)
                     entities.add(self.enemy_get)
                     self.enemy_get.rect.x=self.rect.x
                     self.enemy_get.rect.y=self.rect.y
