@@ -51,7 +51,7 @@ class Partida():
         gm = GameMenu(screen, niveles_funciones.keys(), niveles_funciones)
         gm.run()
 
-    def pause():
+    def pause(self):
         pygame.event.clear()
         while True:
             for e in pygame.event.get():
@@ -77,7 +77,7 @@ class Partida():
                     sys.exit
                 if e.type == KEYDOWN and e.key == K_ESCAPE:
                     paused = True#change for paused menu
-                    pause()
+                    self.pause()
                     up = down = left = right = space = running = False
                     pygame.event.clear()
                     break
