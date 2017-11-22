@@ -582,7 +582,9 @@ class Player(Entity):
 
 
                 if self.agarrado == True:
+                    # Se remueve el mosquito para que paresca que es comido y se agrega a enemy_get
                     self.enemy_get = e
+                        
                     enemies.remove(e)
                     entities.remove(e)
                     self.espera = 0
