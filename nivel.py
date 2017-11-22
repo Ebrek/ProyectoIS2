@@ -229,6 +229,7 @@ class Level():
 
 
     def construir(self, x, y, player_settings, col):
+        '''
         if col == "1":
             p = Platform(x, y, "platform/jungle_pack_07.png")
             self.platforms.append(p)
@@ -319,13 +320,74 @@ class Level():
             d = Decoration(x, y, 128,128, "platform/jungle_pack_66.png")
             self.decorations.append(d)
             self.entities.add(d)
+        '''
+        dict_my_data = {
+            "1": {"image":"jungle_pack_07.png", "type": Platform},
+            "2": {"image":"jungle_pack_35.png", "type": Platform},
+            "P": {"image":"jungle_pack_05.png", "type": Platform},
+            "3": {"image":"jungle_pack_03.png", "type": Platform},
+            "4": {"image":"jungle_pack_11.png", "type": Platform},
+            "5": {"image":"jungle_pack_19.png", "type": Platform},
+            "6": {"image":"jungle_pack_21.png", "type": Platform},
+            "7": {"image":"jungle_pack_40.png", "type": Platform},
+            "0": {"image":"jungle_pack_09.png", "type": Platform},
+
+            "E": {"type": ExitBlock},
+
+
+            "Q": {"type": EnemyMosquito},
+            "S": {"type": EnemySpider},
+            "W": {"type": EnemyBoss},
+
+
+            "D": {"image":"jungle_pack_67.png", "type": Decoration, "w":128, "h":128},
+            "!": {"image":"jungle_pack_59.png", "type": Decoration, "w":128, "h":128},
+            "¡": {"image":"jungle_pack_57.png", "type": Decoration, "w":128, "h":128},
+            "B": {"image":"jungle_pack_66.png", "type": Decoration, "w":128, "h":128},
+
+
+            "G": {"image":"gem_9.png", "type": Gemas, "w":16, "h":16},
+            "C": {"image":"vida.png", "type": Corazon, "w":32, "h":32},
+
+            "F": {"type": Player},
+            " ": {"type": None}
+        }
+        element = None
+        PLATFORM_PATH = "platform/"
+        ITEM_PATH = "items/"
+        try:
+            obj_sprite = dict_my_data[col]
+            if obj_sprite["type"] == Player:
+                self.player = Player(x, y, player_settings[2])
+            elif obj_sprite["type"] == Decoration:
+                element =  Decoration(x, y, obj_sprite["w"], obj_sprite["h"], PLATFORM_PATH + obj_sprite["image"])
+                self.decorations.append(element)
+                self.entities.add(element)
+            elif obj_sprite["type"] == Platform:
+                element = Platform(x, y, PLATFORM_PATH + obj_sprite["image"])
+                self.platforms.append(element)
+                self.entities.add(element)
+            elif obj_sprite["type"] == ExitBlock:
+                element = ExitBlock(x, y)
+                self.platforms.append(element)
+                self.entities.add(element)
+            elif obj_sprite["type"] == EnemyMosquito:
+                element = EnemyMosquito(x, y)
+                self.enemies.append(element)
+                self.entities.add(element)
+            elif obj_sprite["type"] == Gemas:
+                element = Gemas(x, y, obj_sprite["w"], obj_sprite["h"], ITEM_PATH + obj_sprite["image"])
+                self.gemas.append(element)
+                self.entities.add(element)
+            elif obj_sprite["type"] == Corazon:
+                element = Corazon(x, y, obj_sprite["w"], obj_sprite["h"], ITEM_PATH + obj_sprite["image"])
+                self.corazon.append(element)
+                self.entities.add(element)
+        except Exception as e:
+            raise e
 
 
 
-
-        #player
-        if col == "F":
-            self.player = Player(x, y, player_settings[2])
 
 class Background(pygame.sprite.Sprite):
     def __init__(self, image_file, location, screen_sizes):
