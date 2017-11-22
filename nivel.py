@@ -375,6 +375,10 @@ class Level():
                 element = EnemyMosquito(x, y)
                 self.enemies.append(element)
                 self.entities.add(element)
+            elif obj_sprite["type"] == EnemySpider:
+                element = EnemySpider(x, y)
+                self.enemies.append(element)
+                self.entities.add(element)
             elif obj_sprite["type"] == Gemas:
                 element = Gemas(x, y, obj_sprite["w"], obj_sprite["h"], ITEM_PATH + obj_sprite["image"])
                 self.gemas.append(element)
@@ -390,7 +394,7 @@ class Level():
             elif obj_sprite["type"] == None:
                 pass
             else:
-                print("no se encontro: " + obj_sprite["type"])
+                print("no se encontro: " + obj_sprite["type"].__name__)
         except Exception as e:
             raise e
 
