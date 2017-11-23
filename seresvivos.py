@@ -109,6 +109,14 @@ class EnemyMosquito(Entity):
         else:
             self.xvel = -12.0
 
+    def salir_disparadoBoss(self, dir):
+        print("salidisparado")
+        self.disparado = True
+        if dir == 'derecha':
+            self.xvel = 6.0
+        else:
+            self.xvel = -6.0
+
     def collide_anything(self, platforms, enemies, entities):
         for p in platforms:
             if pygame.sprite.collide_rect(self, p):
@@ -241,7 +249,7 @@ class EnemyBoss(Entity):
         image_rect = (self.image.get_rect().size)
         self.image.convert()
         self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
-        
+
     def update(self, platforms, enemies, entities, posX, posY, level_width, level_high):
         self.xvel, self.yvel = self.xvel_ini, self.yvel_ini
 ##        self.move_towards_player(posX, posY)
@@ -251,23 +259,25 @@ class EnemyBoss(Entity):
             self.perdervida(enemies, entities)
 
 #########################################################################################################################
-        if self.contar == 40:
+        if self.contar == 70:
             self.lanzarEnemigo(enemies, entities, self.rect[0] , self.rect[1])
             self.contar = 0
+
+
         self.contar = self.contar + 1
 
 
     def lanzarEnemigo(self, enemies, entities, x, y):
-        ### esto debe ser cambiado para usar la cabeza del boss :v 
+        ### esto debe ser cambiado para usar la cabeza del boss :v
         lugar = randint(0, 2)
         posicion =  [self.rect[3]*2/10,self.rect[3]*4/10,self.rect[3]*6/10]
         q = EnemyMosquito( x- 50, y + posicion[lugar])
         q.follow = True
         enemies.append(q)
         entities.add(q)
-        q.salir_disparado('izquierda')
+        q.salir_disparadoBoss('izquierda')
 #########################################################################################################################
-        
+
 #*    def move_towards_player(self, posX, posY):
 ##        dist = math.hypot(self.rect.x - posX, self.rect.y - posY) #math.sqrt(dx*dx + dy*dy)
 ##        if not self.follow:
@@ -321,6 +331,7 @@ class Player(Entity):
         Entity.__init__(self)
         self.counter=0
         self.counter_lengua=0
+        self.contar=0
         self.xvel = 0
         self.yvel = 0
         self.onGround = False
@@ -382,12 +393,12 @@ class Player(Entity):
 
         self.forma_walk = [0, 'ida']
         self.sacandolengua=False
-    def update(self, up, down, left, right, space, running, platforms, enemies, entities, gemas,corazon, datos, level_width, level_high):
+    def update(self, up, down, left, right, space, running, platforms, enemies, entities, gemas,corazon,feather, datos, level_width, level_high):
         vida = True
         if up:
             # only jump if on the ground
             if self.onGround:
-                self.yvel -= 9.3
+                self.yvel -= gravedad
                 try:
                     self.jumpsound.stop()
                     self.jumpsound.play()
@@ -488,10 +499,13 @@ class Player(Entity):
         self.collide_gemas(gemas, entities, datos)
         #############################################################################################
         self.collide_corazon(corazon,entities,datos)
+        self.collide_feather(feather,entities,datos)
         if(self.rect.y > level_high or self.rect.right < 0 or self.rect.left > level_width or vida == False):
             return False
         else:
             return True
+
+
 
     def sacarlengua(self, dir):
         self.counter_lengua = self.counter_lengua + 1
@@ -584,7 +598,7 @@ class Player(Entity):
                 if self.agarrado == True:
                     # Se remueve el mosquito para que paresca que es comido y se agrega a enemy_get
                     self.enemy_get = e
-                        
+
                     enemies.remove(e)
                     entities.remove(e)
                     self.espera = 0
@@ -647,6 +661,23 @@ class Player(Entity):
 
         return False
 
+################################################################################################
+    def collide_feather(self, feather, entities, datos):
+        global gravedad
+        for e in feather:
+            cogio_feather = False
+
+            cogio_feather= self.agarrarObjeto(e)
+
+            if(cogio_feather == True):
+
+                gravedad = gravedad + 3
+
+                entities.remove(e)
+                feather.remove(e)
+
+        return False
+
 
     #############################################################################################
 
@@ -676,7 +707,7 @@ class Player(Entity):
     		little_thread.start()
     	for element in threads_array:
     		element.join()
-    	'''	
+    	'''
 
 
     def agarrarObjeto(self, objeto):
