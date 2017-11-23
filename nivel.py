@@ -39,69 +39,20 @@ class Partida():
             param.mainloop=False
         niveles_funciones["Pantalla principal"] = mini_function
 
-        '''
-        menu_items = ('Iniciar', 'Mostrar Creditos', 'Salir')
-        funcs = {'Iniciar': iniciar,
-                 'Mostrar Creditos' : mostrar_creditos,
-                 'Salir': sys.exit}
-        '''
-
         pygame.display.set_caption("Froggy!")
         timer = pygame.time.Clock()
         gm = GameMenu(screen, niveles_funciones.keys(), niveles_funciones)
         gm.run()
 
-    def pause(self):
-        pygame.event.clear()
-        while True:
-            for e in pygame.event.get():
-                if e.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if e.type == KEYDOWN and e.key == K_ESCAPE:
-                    return
-
     def cargar_nivel(self, id_nivel, player_settings, bg_music, bg_image, screen):
 
-        up = down = left = right = space = running = False
+        
         level = Level(id_nivel, player_settings, bg_music, bg_image, screen) #player_settings, PATH+'bg_music1.ogg')
         done = play_again = False
         timer = pygame.time.Clock()
         while not (done or play_again):
             timer.tick(FPS_RATE)
-            for e in pygame.event.get():
-                if e.type == QUIT:
-                    done = True
-                    pygame.quit()
-                    import sys
-                    sys.exit
-                if e.type == KEYDOWN and e.key == K_ESCAPE:
-                    paused = True#change for paused menu
-                    self.pause()
-                    up = down = left = right = space = running = False
-                    pygame.event.clear()
-                    break
-                if e.type == KEYDOWN and e.key == K_UP:
-                    up = True
-                if e.type == KEYDOWN and e.key == K_DOWN:
-                    down = True
-                if e.type == KEYDOWN and e.key == K_LEFT:
-                    left = True
-                if e.type == KEYDOWN and e.key == K_RIGHT:
-                    right = True
-                if e.type == KEYDOWN and e.key == K_SPACE:
-                    space = True
-                if e.type == KEYUP and e.key == K_UP:
-                    up = False
-                if e.type == KEYUP and e.key == K_DOWN:
-                    down = False
-                if e.type == KEYUP and e.key == K_RIGHT:
-                    right = False
-                if e.type == KEYUP and e.key == K_LEFT:
-                    left = False
-                if e.type == KEYUP and e.key == K_SPACE:
-                    space = False
-            if(level.update(up, down, left, right, space, running)==False):
+            if(level.update()==False):
                 play_again = True
             pygame.display.update()
         if(play_again):
@@ -123,32 +74,28 @@ class Level():
         self.platforms = []
         self.decorations = []
         self.enemies = []
-        ########################################################nuevo
         self.gemas = []
         self.corazon = []
         self.feather= []
 
-        ########################################################
-
-
         self.escenarios = [] # lista de mapas de nivel
+        self.up = self.down = self.left = self.right = self.space = self.running = False
+
         escenarios = [] # lista de mapas de nivel
         data = Conexion().listar_escenarios(id_nivel)
-        from constantes import PATH
+
+        #from constantes import PATH
         for element in data:
             with open(PATH+element["mapa"]) as json_file:
                 data_map=json.load(json_file)
-                self.escenarios.append(data_map)
+                self.escenarios.append((element["id"],data_map))
         self.escenario_index = 0
         self.level = self.escenarios[self.escenario_index] #inicializar en uno
+
         # build the level
 
         self.total_level_width, self.total_level_height = 0 , 0
         self.construir_mapa(self.level, self.player_settings)
-
-
-        #self.camera = Camera(Camera.complex_camera, self.total_level_width, self.total_level_height)
-        #self.entities.add(self.player)
 
         self.backGround = Background(bg_image, [0,0], (WIN_WIDTH, WIN_HEIGHT))
         try:
@@ -164,20 +111,89 @@ class Level():
         ####################################################################################################
 
     def construir_mapa(self, level, player_settings):
+        self.mostrar_historia(level[0], 'A')
         x = y = 0
-        for row in level:
+        mapa = level[1]
+        for row in mapa:
             for col in row:
                 self.construir(x, y, player_settings, col)
                 x += 32
             y += 32
             x = 0
-        self.total_level_width  = len(level[0])*32
-        self.total_level_height = len(level)*32
+        self.total_level_width  = len(mapa[0])*32
+        self.total_level_height = len(mapa)*32
 
         self.camera = Camera(Camera.complex_camera, self.total_level_width, self.total_level_height)
         self.entities.add(self.player)
 
-    def update(self, up, down, left, right, space, running):
+    def mostrar_historia(self, escenario_id, modalidad):
+        self.up = self.down = self.left = self.right = self.space = self.running = False
+        pygame.event.pump()
+        pygame.event.clear()
+        data = Conexion().listar_historia(escenario_id, modalidad)
+        screen = self.screen
+        bg_color = BLACK
+        screen.fill(bg_color)
+        sig_imagen = True
+        for element in data:
+            if sig_imagen:
+                image = pygame.image.load(PATH+element["imagen"])
+                image = pygame.transform.scale(image,(WIN_WIDTH,WIN_HEIGHT)).convert_alpha()
+                image_width, image_height= image.get_size()
+                screen.blit(image, ((WIN_WIDTH-image_width)/100, (WIN_HEIGHT-image_height)/100))
+                sig_imagen = False
+            pygame.display.flip()
+            while not sig_imagen:
+                for e in pygame.event.get():
+                    if e.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit
+                    if e.type == pygame.KEYDOWN and e.key == pygame.K_TAB:
+                        sig_imagen = True
+    def pause(self):
+        #pygame.event.clear()
+        while True:
+            for e in pygame.event.get():
+                if e.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if e.type == KEYDOWN and e.key == K_ESCAPE:
+                    return
+    def listenKey(self):
+        for e in pygame.event.get():
+            if e.type == QUIT:
+                done = True
+                pygame.quit()
+                import sys
+                sys.exit
+            if e.type == KEYDOWN and e.key == K_ESCAPE:
+                self.pause()
+                self.up = self.down = self.left = self.right = self.space = self.running = False
+                #pygame.event.clear()
+                break
+            if e.type == KEYDOWN and e.key == K_UP:
+                self.up = True
+            if e.type == KEYDOWN and e.key == K_DOWN:
+                self.down = True
+            if e.type == KEYDOWN and e.key == K_LEFT:
+                self.left = True
+            if e.type == KEYDOWN and e.key == K_RIGHT:
+                self.right = True
+            if e.type == KEYDOWN and e.key == K_SPACE:
+                self.space = True
+            if e.type == KEYUP and e.key == K_UP:
+                self.up = False
+            if e.type == KEYUP and e.key == K_DOWN:
+                self.down = False
+            if e.type == KEYUP and e.key == K_RIGHT:
+                self.right = False
+            if e.type == KEYUP and e.key == K_LEFT:
+                self.left = False
+            if e.type == KEYUP and e.key == K_SPACE:
+                self.space = False
+
+    def update(self):
+        self.listenKey()
         # draw background
         for y in range(32):
             for x in range(32):
@@ -189,6 +205,7 @@ class Level():
         # update player, draw everything else
         if self.player.onExitBlock:
             #wea de apasar nivel
+
             self.escenario_index += 1
             if self.escenario_index < len(self.escenarios):
                 print("construido")
@@ -199,21 +216,18 @@ class Level():
                 self.gemas = []
                 self.corazon = []
                 self.feather=[]
-
+                
+                self.mostrar_historia(self.level[0], 'D')
                 self.construir_mapa(self.escenarios[self.escenario_index],self.player_settings)
                 return;
             else:
                 print("Ganasteeeeee")
                 return False
-        if not self.player.update(up, down, left, right, space, running, self.platforms, self.enemies, self.entities,self.gemas, self.corazon, self.feather, self.datos, self.total_level_width, self.total_level_height):
+        if not self.player.update(self.up, self.down, self.left, self.right, self.space, self.running, self.platforms, self.enemies, self.entities,self.gemas, self.corazon, self.feather, self.datos, self.total_level_width, self.total_level_height):
             return False
         for e in self.entities:
             self.screen.blit(e.image, self.camera.apply(e))
-        '''
-        for e in self.entities:
-            self.screen.blit(e.image, self.camera.apply(e))
-        '''
-        ####################################################################################################
+
         self.datos.update()
         self.mostrarDatos()
 
@@ -223,7 +237,6 @@ class Level():
         for d in self.datos.datos:
             self.screen.blit(d, (400 + ancho,10))
             ancho =  ancho + d.get_rect()[2] + 5
-        ####################################################################################################
 
     def playmusic(self, file):
         pygame.mixer.init()
@@ -232,107 +245,8 @@ class Level():
 
 
     def construir(self, x, y, player_settings, col):
-        '''
-        if col == "1":
-            p = Platform(x, y, "platform/jungle_pack_07.png")
-            self.platforms.append(p)
-            self.entities.add(p)
 
-        if col == "2":
-            p = Platform(x, y, "platform/jungle_pack_35.png")
-            self.platforms.append(p)
-            self.entities.add(p)
-        if col == "P":
-            p = Platform(x, y, "platform/jungle_pack_05.png")
-            self.platforms.append(p)
-            self.entities.add(p)
-        if col == "3":
-            p = Platform(x, y, "platform/jungle_pack_03.png")
-            self.platforms.append(p)
-            self.entities.add(p)
-        if col == "4":
-            p = Platform(x, y, "platform/jungle_pack_11.png")
-            self.platforms.append(p)
-            self.entities.add(p)
-
-        if col == "5":
-            p = Platform(x, y, "platform/jungle_pack_19.png")
-            self.platforms.append(p)
-            self.entities.add(p)
-        if col == "6":
-            p = Platform(x, y, "platform/jungle_pack_21.png")
-            self.platforms.append(p)
-            self.entities.add(p)
-        if col == "7":
-            p = Platform(x, y, "platform/jungle_pack_40.png")
-            self.platforms.append(p)
-            self.entities.add(p)
-        if col == "E":
-            e = ExitBlock(x, y)
-            self.platforms.append(e)
-            self.entities.add(e)
-        if col == "Q":
-            q = EnemyMosquito(x, y)
-            self.enemies.append(q)
-            self.entities.add(q)
-        if col == "S":
-            s = EnemySpider(x, y)
-            self.enemies.append(s)
-            self.entities.add(s)
-
-        if col == "0":
-            p = Platform(x, y, "platform/jungle_pack_09.png")
-            self.platforms.append(p)
-            self.entities.add(p)
-
-        if col == "D":
-            d = Decoration(x, y, 128,128, "platform/jungle_pack_67.png")
-            self.decorations.append(d)
-            self.entities.add(d)
-
-            #GEMAS
-            ########################################################
-        if col == "G":
-            g = Gemas(x, y, 16,16, "items/gem_9.png")
-            self.gemas.append(g)
-            self.entities.add(g)
-
-            #CORAZON
-        if col == "C":
-            c = Corazon(x, y, 32,32, "items/vida.png")
-
-            self.corazon.append(c)
-            self.entities.add(c)
-
-        if col == "V":
-            f = Feather(x, y, 32,32, "items/feather.png")
-
-            self.feather.append(f)
-            self.entities.add(f)
-
-
-
-        if col == "W":
-            w = EnemyBoss(x, y)
-            self.enemies.append(w)
-            self.entities.add(w)
-
-            ########################################################
-
-        if col == "!":
-            d = Decoration(x, y, 128,128, "platform/jungle_pack_59.png")
-            self.decorations.append(d)
-            self.entities.add(d)
-        if col == "¡":
-            d = Decoration(x, y, 128,128, "platform/jungle_pack_57.png")
-            self.decorations.append(d)
-            self.entities.add(d)
-        if col == "B":
-            d = Decoration(x, y, 128,128, "platform/jungle_pack_66.png")
-            self.decorations.append(d)
-            self.entities.add(d)
-        '''
-        dict_my_data = {
+        BLOCK_DATA = {
             "1": {"image":"jungle_pack_07.png", "type": Platform},
             "2": {"image":"jungle_pack_35.png", "type": Platform},
             "P": {"image":"jungle_pack_05.png", "type": Platform},
@@ -360,14 +274,17 @@ class Level():
             "G": {"image":"gem_9.png", "type": Gemas, "w":16, "h":16},
             "C": {"image":"vida.png", "type": Corazon, "w":32, "h":32},
 
+            "V": {"image":"feather.png", "type":Feather, "w":32, "h":32},
+
             "F": {"type": Player},
             " ": {"type": None}
         }
+
         element = None
         PLATFORM_PATH = "platform/"
         ITEM_PATH = "items/"
         try:
-            obj_sprite = dict_my_data[col]
+            obj_sprite = BLOCK_DATA[col]
             if obj_sprite["type"] == Player:
                 self.player = Player(x, y, player_settings[2])
             elif obj_sprite["type"] == Decoration:
@@ -401,6 +318,10 @@ class Level():
             elif obj_sprite["type"] == EnemyBoss:
                 element = EnemyBoss(x, y)
                 self.enemies.append(element)
+                self.entities.add(element)
+            elif obj_sprite["type"] == Feather:
+                element = Feather(x, y, obj_sprite["w"], obj_sprite["h"], ITEM_PATH + obj_sprite["image"])
+                self.feather.append(element)
                 self.entities.add(element)
             elif obj_sprite["type"] == None:
                 pass

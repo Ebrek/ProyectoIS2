@@ -2,6 +2,7 @@ import pygame
 from PIL import Image, ImageOps
 import numpy, math
 
+
 WIN_WIDTH = 800
 WIN_HEIGHT = 640
 HALF_WIDTH = int(WIN_WIDTH / 2)

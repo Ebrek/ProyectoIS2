@@ -5,6 +5,7 @@ import numpy
 import math
 from pantallas import *
 from nivel import *
+from constantes import *
 
 
 
@@ -14,7 +15,7 @@ def main():
     pygame.init()
 
 
-    screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), 0, 32)
+    screen = pygame.display.set_mode(DISPLAY, FLAGS, DEPTH)
     menu_items = ('Iniciar', 'Mostrar Creditos', 'Salir')
     funcs = {'Iniciar': iniciar,
              'Mostrar Creditos' : mostrar_creditos,

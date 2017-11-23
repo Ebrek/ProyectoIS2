@@ -153,37 +153,13 @@ class GameMenu():
             pygame.display.flip()
 
 
-def mostrar_scenario_1(screen):
-    image_count = 1
-    STORY_PATH = "froggy_story/"
-    while image_count < 4:
-
-        #screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), 32, 32)
-        bg_color = BLACK
-        screen.fill(bg_color)
-
-        image = pygame.image.load(PATH + STORY_PATH + "s" + str(image_count) + ".jpg")
-        image = pygame.transform.scale(image,(WIN_WIDTH,WIN_HEIGHT))
-        image_width, image_height= image.get_size()
-        screen.blit(image, ((WIN_WIDTH-image_width)/100, (WIN_HEIGHT-image_height)/100))
-
-        pygame.display.flip()
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit
-            if e.type == pygame.KEYDOWN and e.key == pygame.K_TAB:
-                image_count += 1
-
-
 def iniciar(param):
-    #param.mainloop = False
-    #mostrar_scenario_1(param.screen)
-
+    param.mainloop=False
+    print(param.mainloop)
     from nivel import Partida
-    partida = Partida(param.screen)
+    partida = Partida()
     partida.mostrar_pantalla_niveles()
-                                                        
+    param.mainloop = True
 def mostrar_creditos(param):
     print("Creditos")
 class Media_Screen():

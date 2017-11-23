@@ -27,6 +27,18 @@ class Conexion():
         c.close() 
         return result
 
+    def listar_historia(self, escenario_id, modalidad):
+        c = conn.cursor()
+        c.execute("""SELECT id, title, imagen, orden, suceso FROM Configurador_historia
+            WHERE escenario_id = ? AND suceso = ?
+            ORDER BY orden ASC""", (escenario_id, modalidad,) )
+        rows = c.fetchall()
+        result = []
+        for row in rows:
+            result.append(row)
+        c.close()
+        return result
+
     def obtener_ajustesgeneral(self):
         c = conn.cursor()
         c.execute("""SELECT id, title, froggy_health, 
@@ -36,3 +48,4 @@ class Conexion():
         row = c.fetchone()
         c.close() 
         return row
+
