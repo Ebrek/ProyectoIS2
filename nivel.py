@@ -10,9 +10,9 @@ import json
 
 
 class Partida():
-    def __init__(self):
+    def __init__(self, screen):
         #para cambiar niveles cambiar el nombre a level (no duplicados)
-
+        self.screen = screen
 
         self.player_settings = (32, 32, PATH + "froggy.png")
 
@@ -20,25 +20,25 @@ class Partida():
 
     def mostrar_pantalla_niveles(self):
 
+        screen = self.screen
         niveles_funciones = {}
-        def function_builder(id, bg_music, bg_image):
+        def function_builder(id, bg_music, bg_image, screen):
             def function(param):
                 param.mainloop=False
-                self.cargar_nivel(id, self.player_settings, bg_music, bg_image)
+                self.cargar_nivel(id, self.player_settings, bg_music, bg_image, screen)
             return function
         for element in self.niveles_data:
             bg_music = element["bg_music"]
             bg_image = element["bg_image"]
             def load_level(param):
                 param.mainloop=False
-                self.cargar_nivel(element["id"], self.player_settings, PATH + bg_music, PATH + bg_image)
-            niveles_funciones[element["title"]] = function_builder(element["id"], PATH + bg_music, PATH + bg_image)
+                self.cargar_nivel(element["id"], self.player_settings, PATH + bg_music, PATH + bg_image, screen)
+            niveles_funciones[element["title"]] = function_builder(element["id"], PATH + bg_music, PATH + bg_image, screen)
 
         def mini_function(param):
             param.mainloop=False
         niveles_funciones["Pantalla principal"] = mini_function
 
-        screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), 0, 32)
         '''
         menu_items = ('Iniciar', 'Mostrar Creditos', 'Salir')
         funcs = {'Iniciar': iniciar,
@@ -61,10 +61,10 @@ class Partida():
                 if e.type == KEYDOWN and e.key == K_ESCAPE:
                     return
 
-    def cargar_nivel(self, id_nivel, player_settings, bg_music, bg_image):
+    def cargar_nivel(self, id_nivel, player_settings, bg_music, bg_image, screen):
 
         up = down = left = right = space = running = False
-        level = Level(id_nivel, player_settings, bg_music, bg_image) #player_settings, PATH+'bg_music1.ogg')
+        level = Level(id_nivel, player_settings, bg_music, bg_image, screen) #player_settings, PATH+'bg_music1.ogg')
         done = play_again = False
         timer = pygame.time.Clock()
         while not (done or play_again):
@@ -114,8 +114,8 @@ class Partida():
 
 
 class Level():
-    def __init__(self, id_nivel, player_settings, bg_music, bg_image):
-        self.screen = pygame.display.set_mode(DISPLAY, FLAGS, DEPTH)
+    def __init__(self, id_nivel, player_settings, bg_music, bg_image, screen):
+        self.screen = screen
         self.bg = pygame.Surface((32,32))
         self.bg.convert()
         self.entities = pygame.sprite.Group()
