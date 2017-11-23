@@ -622,12 +622,20 @@ class Player(Entity):
 
 
     def perder_vida(self, datos):
+        global gravedad
         try:
             self.punchedsound.play()
         except Exception:
             print("no audio")
         datos.vidas_restantes = datos.vidas_restantes - 1
         print("vida" + str(datos.vidas_restantes))
+
+        if (gravedad==9.3):
+            pass
+        elif gravedad != 9.3:
+            gravedad == gravedad-3
+
+
 
     def ganar_vida(self, datos):
         datos.vidas_restantes = datos.vidas_restantes + 1
@@ -666,18 +674,26 @@ class Player(Entity):
         global gravedad
         for e in feather:
             cogio_feather = False
-
             cogio_feather= self.agarrarObjeto(e)
-
             if(cogio_feather == True):
-
-                gravedad = gravedad + 3
+                if (gravedad==9.3):
+                    gravedad = gravedad + 3
+                elif gravedad != 9.3:
+                    pass
 
                 entities.remove(e)
                 feather.remove(e)
 
         return False
 
+####################################################################################################
+
+    def perder_salto(self,entities,datos):
+        global gravedad
+        if (gravedad==9.3):
+            gravedad = gravedad + 3
+        elif gravedad != 9.3:
+            pass
 
     #############################################################################################
 

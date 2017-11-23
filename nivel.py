@@ -273,6 +273,7 @@ class Level():
 
             "G": {"image":"gem_9.png", "type": Gemas, "w":16, "h":16},
             "C": {"image":"vida.png", "type": Corazon, "w":32, "h":32},
+            "V": {"image":"feather.png", "type": Feather, "w":32, "h":32},
 
             "V": {"image":"feather.png", "type":Feather, "w":32, "h":32},
 
@@ -314,6 +315,10 @@ class Level():
             elif obj_sprite["type"] == Corazon:
                 element = Corazon(x, y, obj_sprite["w"], obj_sprite["h"], ITEM_PATH + obj_sprite["image"])
                 self.corazon.append(element)
+                self.entities.add(element)
+            elif obj_sprite["type"] == Feather:
+                element = Feather(x, y, obj_sprite["w"], obj_sprite["h"], ITEM_PATH + obj_sprite["image"])
+                self.feather.append(element)
                 self.entities.add(element)
             elif obj_sprite["type"] == EnemyBoss:
                 element = EnemyBoss(x, y)
