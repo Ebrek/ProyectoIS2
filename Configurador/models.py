@@ -8,8 +8,8 @@ class Nivel(models.Model):
 
 	#contiene path de audio y path de imagen de fondo
 	title = models.CharField(max_length=50)
-	bg_music = models.FileField(upload_to='bg_music/')
-	bg_image = models.FileField(upload_to='bg_images/')
+	bg_music = models.FileField(upload_to='bgmusic/')
+	bg_image = models.FileField(upload_to='bgimages/')
 
 	def __unicode__(self):
 		return self.title
@@ -32,7 +32,6 @@ class Escenario(models.Model):
 		return self.title
 class Historia(models.Model):
 
-	#contiene archivos de niveles
 	title = models.CharField(max_length=50)
 	imagen = models.FileField(upload_to='historia/')
 	escenario  = models.ForeignKey(Escenario, on_delete=models.CASCADE)
@@ -52,6 +51,17 @@ class Historia(models.Model):
 
 	def __str__(self):
 		return self.title
+class Puntaje(models.Model):
+
+	player = models.CharField(max_length=50)
+	nivel  = models.ForeignKey(Nivel, on_delete=models.CASCADE)
+	puntaje = models.IntegerField()
+
+	def __unicode__(self):
+		return self.player + " " + str(self.puntaje)
+
+	def __str__(self):
+		return self.player + " " + str(self.puntaje)
 class AjustesGeneral(models.Model):
 
 	#contine parametros generales

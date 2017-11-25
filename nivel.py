@@ -1,11 +1,12 @@
 
-from pygame import *
+import pygame
 from constantes import *
 from objetosestaticos import *
 from seresvivos import *
-from pantallas import GameMenu
+from pantallas import GameMenu, Datos_partida
 
 import json
+
 
 
 
@@ -32,8 +33,8 @@ class Partida():
             bg_image = element["bg_image"]
             def load_level(param):
                 param.mainloop=False
-                self.cargar_nivel(element["id"], self.player_settings, PATH + bg_music, PATH + bg_image, screen)
-            niveles_funciones[element["title"]] = function_builder(element["id"], PATH + bg_music, PATH + bg_image, screen)
+                self.cargar_nivel(element["id"], self.player_settings, bg_music, bg_image, screen)
+            niveles_funciones[element["title"]] = function_builder(element["id"], bg_music, bg_image, screen)
 
         def mini_function(param):
             param.mainloop=False
@@ -60,8 +61,7 @@ class Partida():
             pass
         else:
             pygame.quit()
-            import sys
-            sys.exit
+            exit()
 
 
 class Level():
@@ -85,10 +85,17 @@ class Level():
         data = Conexion().listar_escenarios(id_nivel)
 
         #from constantes import PATH
+        data_map = None
+
         for element in data:
-            with open(PATH+element["mapa"]) as json_file:
-                data_map=json.load(json_file)
-                self.escenarios.append((element["id"],data_map))
+            '''if REST_MODE:
+                data_map = requests.get(element["mapa"]).json()
+            else:
+                with open(element["mapa"]) as json_file:
+                    data_map = json.load(json_file)'''
+            data_map = load_manager(element["mapa"], isJson=True)
+            #data_map = json.load(load_manager(element["mapa"]))
+            self.escenarios.append((element["id"], data_map))
         self.escenario_index = 0
         self.level = self.escenarios[self.escenario_index] #inicializar en uno
 
@@ -96,6 +103,11 @@ class Level():
 
         self.total_level_width, self.total_level_height = 0 , 0
         self.construir_mapa(self.level, self.player_settings)
+
+
+
+        bg_image = load_manager(bg_image)
+        bg_music = load_manager(bg_music)
 
         self.backGround = Background(bg_image, [0,0], (WIN_WIDTH, WIN_HEIGHT))
         try:
@@ -107,7 +119,7 @@ class Level():
 
         self.vidas_inicio = FROGGY_VIDA
         self.letra_datos = 20
-        self.datos = Datos_partida("items/gem_9.png", "items/corazon.jpg","items/feather.png",self.letra_datos, self.vidas_inicio)
+        self.datos = Datos_partida("items/gem_9.png", "items/vida.png","items/feather.png",self.letra_datos, self.vidas_inicio)
         ####################################################################################################
 
     def construir_mapa(self, level, player_settings):
@@ -137,7 +149,7 @@ class Level():
         sig_imagen = True
         for element in data:
             if sig_imagen:
-                image = pygame.image.load(PATH+element["imagen"])
+                image = pygame.image.load(load_manager(element["imagen"]))#PATH+element["imagen"])
                 image = pygame.transform.scale(image,(WIN_WIDTH,WIN_HEIGHT)).convert_alpha()
                 image_width, image_height= image.get_size()
                 screen.blit(image, ((WIN_WIDTH-image_width)/100, (WIN_HEIGHT-image_height)/100))
@@ -154,42 +166,41 @@ class Level():
         #pygame.event.clear()
         while True:
             for e in pygame.event.get():
-                if e.type == QUIT:
+                if e.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                if e.type == KEYDOWN and e.key == K_ESCAPE:
+                if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
                     return
     def listenKey(self):
         for e in pygame.event.get():
-            if e.type == QUIT:
+            if e.type == pygame.QUIT:
                 done = True
                 pygame.quit()
-                import sys
-                sys.exit
-            if e.type == KEYDOWN and e.key == K_ESCAPE:
+                exit()
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
                 self.pause()
                 self.up = self.down = self.left = self.right = self.space = self.running = False
                 #pygame.event.clear()
                 break
-            if e.type == KEYDOWN and e.key == K_UP:
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_UP:
                 self.up = True
-            if e.type == KEYDOWN and e.key == K_DOWN:
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_DOWN:
                 self.down = True
-            if e.type == KEYDOWN and e.key == K_LEFT:
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_LEFT:
                 self.left = True
-            if e.type == KEYDOWN and e.key == K_RIGHT:
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_RIGHT:
                 self.right = True
-            if e.type == KEYDOWN and e.key == K_SPACE:
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_SPACE:
                 self.space = True
-            if e.type == KEYUP and e.key == K_UP:
+            if e.type == pygame.KEYUP and e.key == pygame.K_UP:
                 self.up = False
-            if e.type == KEYUP and e.key == K_DOWN:
+            if e.type == pygame.KEYUP and e.key == pygame.K_DOWN:
                 self.down = False
-            if e.type == KEYUP and e.key == K_RIGHT:
+            if e.type == pygame.KEYUP and e.key == pygame.K_RIGHT:
                 self.right = False
-            if e.type == KEYUP and e.key == K_LEFT:
+            if e.type == pygame.KEYUP and e.key == pygame.K_LEFT:
                 self.left = False
-            if e.type == KEYUP and e.key == K_SPACE:
+            if e.type == pygame.KEYUP and e.key == pygame.K_SPACE:
                 self.space = False
 
     def update(self):
@@ -221,7 +232,7 @@ class Level():
                 self.construir_mapa(self.escenarios[self.escenario_index],self.player_settings)
                 return;
             else:
-                print("Ganasteeeeee")
+                print("Ganasteeeeee") # mejorar aqui
                 return False
         if not self.player.update(self.up, self.down, self.left, self.right, self.space, self.running, self.platforms, self.enemies, self.entities,self.gemas, self.corazon, self.feather, self.datos, self.total_level_width, self.total_level_height):
             return False
@@ -243,10 +254,7 @@ class Level():
         pygame.mixer.music.load(file)
         pygame.mixer.music.play(-1, 0.0)
 
-
-    def construir(self, x, y, player_settings, col):
-
-        BLOCK_DATA = {
+    BLOCK_DATA = {
             "1": {"image":"jungle_pack_07.png", "type": Platform},
             "2": {"image":"jungle_pack_35.png", "type": Platform},
             "P": {"image":"jungle_pack_05.png", "type": Platform},
@@ -275,17 +283,16 @@ class Level():
             "C": {"image":"vida.png", "type": Corazon, "w":32, "h":32},
             "V": {"image":"feather.png", "type": Feather, "w":32, "h":32},
 
-            "V": {"image":"feather.png", "type":Feather, "w":32, "h":32},
-
             "F": {"type": Player},
             " ": {"type": None}
         }
 
+    def construir(self, x, y, player_settings, col):
         element = None
         PLATFORM_PATH = "platform/"
         ITEM_PATH = "items/"
         try:
-            obj_sprite = BLOCK_DATA[col]
+            obj_sprite = self.BLOCK_DATA[col]
             if obj_sprite["type"] == Player:
                 self.player = Player(x, y, player_settings[2])
             elif obj_sprite["type"] == Decoration:
@@ -324,10 +331,6 @@ class Level():
                 element = EnemyBoss(x, y)
                 self.enemies.append(element)
                 self.entities.add(element)
-            elif obj_sprite["type"] == Feather:
-                element = Feather(x, y, obj_sprite["w"], obj_sprite["h"], ITEM_PATH + obj_sprite["image"])
-                self.feather.append(element)
-                self.entities.add(element)
             elif obj_sprite["type"] == None:
                 pass
             else:
@@ -347,39 +350,3 @@ class Background(pygame.sprite.Sprite):
         self.rect.left, self.rect.top = location
 
 
-class Datos_partida():
-    def __init__(self, image_path_gema, image_path_vida, image_path_feather, letra_datos, vidas_inicio):
-        self.puntaje = 0
-        self.vidas_restantes = vidas_inicio
-        self.datos = []
-
-        # PUNTAJE
-        self.letra = pygame.font.SysFont("Arial", letra_datos)
-        self.datos.append( self.letra.render(str(self.puntaje), True, (100,200,0), None ))
-
-        # IMAGEN GEMA
-        self._image_gema = pygame.image.load(PATH + image_path_gema)
-        self._image_gema = pygame.transform.scale(self._image_gema, (self.datos[0].get_rect()[3], self.datos[0].get_rect()[3])).convert_alpha()
-        self.datos.append( self._image_gema )
-
-        # VIDAS INICIO
-        self.datos.append( self.letra.render(str(vidas_inicio), True, (100,200,0), None ))
-
-        # IMAGEN VIDA
-        self._image_vida = pygame.image.load(PATH + image_path_vida)
-        self._image_vida = pygame.transform.scale(self._image_vida, (self.datos[0].get_rect()[3], self.datos[0].get_rect()[3])).convert_alpha()
-        self.datos.append( self._image_vida )
-
-        #imagen Feather
-        self._image_feather = pygame.image.load(PATH + image_path_gema)
-        self._image_feather = pygame.transform.scale(self._image_feather, (self.datos[0].get_rect()[3], self.datos[0].get_rect()[3])).convert_alpha()
-        self.datos.append( self._image_feather )
-
-
-        #self.screen.blit(imagenTextoPresent, (400, 10))
-        #self.screen.blit(imagenTextoPresent, (400 + imagenTextoPresent.get_rect()[2], 10))
-
-
-    def update(self):
-        self.datos[0] = self.letra.render(str(self.puntaje), True, (100,200,0), None )
-        self.datos[2] = self.letra.render(str(self.vidas_restantes), True, (100,200,0), None )

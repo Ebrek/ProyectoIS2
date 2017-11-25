@@ -1,8 +1,10 @@
 import pygame
 from PIL import Image, ImageOps
 import numpy, math
-
-
+from urllib.request import urlopen
+import io
+import requests
+import json
 WIN_WIDTH = 800
 WIN_HEIGHT = 640
 HALF_WIDTH = int(WIN_WIDTH / 2)
@@ -20,7 +22,21 @@ CAMERA_SLACK = 30
 
 gravedad= 9.3
 
+REST_MODE = False
 
+def load_manager(element, isJson=False):
+    print(element)
+    if REST_MODE:
+        if isJson:
+            return requests.get(element).json()
+        file = urlopen(element).read()
+        # create a file object (stream)
+        return io.BytesIO(file)
+    else:
+        if isJson:
+            with open(PATH + element) as json_file:
+                return json.load(json_file)
+        return PATH + element
 
 from conexion import Conexion
 AJUSTES_GENERALES = Conexion().obtener_ajustesgeneral()

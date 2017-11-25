@@ -1,4 +1,3 @@
-import sys
 import sqlite3
 conn = sqlite3.connect('db.sqlite3')
 conn.row_factory = sqlite3.Row
@@ -48,4 +47,64 @@ class Conexion():
         row = c.fetchone()
         c.close() 
         return row
+
+    def obtener_puntaje(self, nivel_id):
+        c = conn.cursor()
+        c.execute("""SELECT id, player, puntaje FROM Configurador_puntaje
+            WHERE nivel_id = ? 
+            ORDER BY puntaje DESC""", (nivel_id,) )
+        rows = c.fetchall()
+        result = []
+        for row in rows:
+            result.append(row)
+        c.close() 
+        return result
+
+
+
+######################################################################################
+import requests
+import json
+URL = 'http://localhost:8000/'
+
+
+class Conexion1():
+
+
+    def listar_niveles(self):
+        REL = 'niveles/'
+        response = requests.get(URL + REL)
+        return response.json()
+        
+    def listar_escenarios(self, nivel_id):
+        REL = 'escenarios/?nivel_id=' + str(nivel_id)
+        response = requests.get(URL + REL).json()
+        #ASC orden
+        #sorted_obj = dict(response.json()) 
+        sorted_obj = sorted(response, key=lambda x : int(x['orden']), reverse=False)
+
+        return sorted_obj
+
+    def listar_historia(self, escenario_id, modalidad):
+        REL = 'historias/?escenario_id=' + str(escenario_id) + '&suceso=' + modalidad
+        response = requests.get(URL + REL).json()
+        #ASC orden
+        #sorted_obj = dict(response.json()) 
+        sorted_obj = sorted(response, key=lambda x : int(x['orden']), reverse=False)
+
+        return sorted_obj
+
+    def obtener_ajustesgeneral(self):
+        REL = 'ajustesgenerales/'
+        response = requests.get(URL + REL)
+        return response.json()[0]
+
+    def obtener_puntaje(self, nivel_id):
+        REL = 'puntajes/' + str(nivel_id)
+        response = requests.get(URL + REL).json()
+        #ASC puntaje
+        #sorted_obj = dict(response.json()) 
+        sorted_obj = sorted(response, key=lambda x : int(x['puntaje']), reverse=True)
+
+        return sorted_obj
 

@@ -1,6 +1,5 @@
 
-import pygame
-import sys
+import pygame, sys
 from constantes import *
 
 class MenuItem(pygame.font.Font):
@@ -152,40 +151,62 @@ class GameMenu():
 
             pygame.display.flip()
 
+class Pantalla_Inicio():
+    def __init__(self, screen):
+        self.screen = screen
+        funcs = {'Iniciar': self.iniciar,
+                 'Mostrar Creditos' : self.mostrar_creditos,
+                 'Salir': sys.exit}
+        pygame.display.set_caption("Froggy!")
+        self.gameMenu = GameMenu(screen, funcs.keys(), funcs)
+        
+    def run(self):
+        self.gameMenu.run()
 
-def mostrar_scenario_1(screen):
-    image_count = 1
-    STORY_PATH = "froggy_story/"
-    while image_count < 4:
+    def iniciar(self, param):
+        from nivel import Partida
+        partida = Partida(param.screen)
+        partida.mostrar_pantalla_niveles()
+                                                            
+    def mostrar_creditos(self, param):
+        print("Creditos")
+class Datos_partida():
+    def __init__(self, image_path_gema, image_path_vida, image_path_feather, letra_datos, vidas_inicio):
+        self.puntaje = 0
+        self.vidas_restantes = vidas_inicio
+        self.datos = []
 
-        #screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), 32, 32)
-        bg_color = BLACK
-        screen.fill(bg_color)
+        # PUNTAJE
+        self.letra = pygame.font.SysFont("Arial", letra_datos)
+        self.datos.append( self.letra.render(str(self.puntaje), True, (100,200,0), None ))
 
-        image = pygame.image.load(PATH + STORY_PATH + "s" + str(image_count) + ".jpg")
-        image = pygame.transform.scale(image,(WIN_WIDTH,WIN_HEIGHT))
-        image_width, image_height= image.get_size()
-        screen.blit(image, ((WIN_WIDTH-image_width)/100, (WIN_HEIGHT-image_height)/100))
+        # IMAGEN GEMA
+        self._image_gema = pygame.image.load(PATH + image_path_gema)
+        self._image_gema = pygame.transform.scale(self._image_gema, (self.datos[0].get_rect()[3], self.datos[0].get_rect()[3])).convert_alpha()
+        self.datos.append( self._image_gema )
 
-        pygame.display.flip()
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit
-            if e.type == pygame.KEYDOWN and e.key == pygame.K_TAB:
-                image_count += 1
+        # VIDAS INICIO
+        self.datos.append( self.letra.render(str(vidas_inicio), True, (100,200,0), None ))
+
+        # IMAGEN VIDA
+        self._image_vida = pygame.image.load(PATH + image_path_vida)
+        self._image_vida = pygame.transform.scale(self._image_vida, (self.datos[0].get_rect()[3], self.datos[0].get_rect()[3])).convert_alpha()
+        self.datos.append( self._image_vida )
+
+        #imagen Feather
+        #self._image_feather = pygame.image.load(PATH + image_path_gema)
+        #self._image_feather = pygame.transform.scale(self._image_feather, (self.datos[0].get_rect()[3], self.datos[0].get_rect()[3])).convert_alpha()
+        #self.datos.append( self._image_feather )
 
 
-def iniciar(param):
-    #param.mainloop = False
-    #mostrar_scenario_1(param.screen)
+        #self.screen.blit(imagenTextoPresent, (400, 10))
+        #self.screen.blit(imagenTextoPresent, (400 + imagenTextoPresent.get_rect()[2], 10))
 
-    from nivel import Partida
-    partida = Partida(param.screen)
-    partida.mostrar_pantalla_niveles()
-                                                        
-def mostrar_creditos(param):
-    print("Creditos")
+
+    def update(self):
+        self.datos[0] = self.letra.render(str(self.puntaje), True, (100,200,0), None )
+        self.datos[2] = self.letra.render(str(self.vidas_restantes), True, (100,200,0), None )
+
 class Media_Screen():
     def __init__(self, timer, bg):
         self.timer = timer

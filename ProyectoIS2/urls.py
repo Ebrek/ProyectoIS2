@@ -17,10 +17,32 @@ from django.conf import settings
 from django.conf.urls import include, url
 from django.conf.urls.static import static
 from django.contrib import admin
+from Configurador import views
+from rest_framework.urlpatterns import format_suffix_patterns
+
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+
+    url(r'^niveles/$', views.Nivel_Lista.as_view()),
+    url(r'^niveles/(?P<pk>[0-9]+)/', views.Nivel_Detalle.as_view()),
+
+    url(r'^escenarios/$', views.Escenario_Lista.as_view()),
+    url(r'^escenarios/(?P<pk>[0-9]+)/', views.Escenario_Detalle.as_view()),
+
+    url(r'^historias/(?P<pk>.+)/$', views.Historia_Lista.as_view()),
+    url(r'^historias/(?P<pk>[0-9]+)/', views.Historia_Detalle.as_view()),
+
+    url(r'^historias/$', views.Historia_Lista.as_view()),
+    url(r'^puntajes/$', views.Puntaje_Lista.as_view()),
+    url(r'^puntajes/(?P<pk>[0-9]+)/', views.Puntaje_Detalle.as_view()),
+
+    url(r'^ajustesgenerales/$', views.AjustesGeneral_Lista.as_view()),
+    url(r'^ajustesgenerales/(?P<pk>[0-9]+)/', views.AjustesGeneral_Detalle.as_view()),
 ]
+
+
+urlpatterns = format_suffix_patterns(urlpatterns)
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

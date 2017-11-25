@@ -31,13 +31,15 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'Configurador.apps.ConfiguradorConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    'rest_framework',
+    'Configurador.apps.ConfiguradorConfig',
 ]
 
 MIDDLEWARE = [
@@ -124,4 +126,5 @@ STATIC_URL = '/static/'
 # Añadidos
 
 MEDIA_URL = "/media/"
+
 MEDIA_ROOT = os.path.join(BASE_DIR, "Resources")
