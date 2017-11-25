@@ -395,6 +395,8 @@ class Player(Entity):
         self.sacandolengua=False
     def update(self, up, down, left, right, space, running, platforms, enemies, entities, gemas,corazon,feather, datos, level_width, level_high):
         vida = True
+        global gravedad
+
         if up:
             # only jump if on the ground
             if self.onGround:
@@ -589,6 +591,7 @@ class Player(Entity):
         return False'''
     #############################################################################################
     def collide_enemies(self, enemies, entities, datos):
+        global gravedad
         sigue_vivo = True
         for e in enemies:
             if isinstance(e, EnemyMosquito) and self.agarrado == False and self.forma[0] != 0 and self.espera == 15:
@@ -614,6 +617,7 @@ class Player(Entity):
                     self.perder_vida(datos)
                     if datos.vidas_restantes == 0:
                         sigue_vivo = False
+                        gravedad ==9.3
                     self.contador_sin_perder_vida = 0
                     return sigue_vivo
                 else:
@@ -629,11 +633,12 @@ class Player(Entity):
             print("no audio")
         datos.vidas_restantes = datos.vidas_restantes - 1
         print("vida" + str(datos.vidas_restantes))
-
+        print(gravedad)
         if (gravedad==9.3):
             pass
         elif gravedad != 9.3:
-            gravedad == gravedad-3
+            gravedad = gravedad-3
+            print("perdiste feather")
 
 
 
