@@ -79,10 +79,10 @@ WSGI_APPLICATION = 'ProyectoIS2.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',#'django.db.backends.sqlite3',
-        'NAME': 'froggydb',#os.path.join(BASE_DIR, 'db.sqlite3'),
-        'USER': 'postgres',
-        'PASSWORD': 'adminadmin',
-        'HOST': 'localhost',
+        'NAME': 'demlttp1q35tuq',#froggydb',#os.path.join(BASE_DIR, 'db.sqlite3'),
+        'USER': 'npfsymqkfyrcpe',
+        'PASSWORD': 'ef8c0161513098bc90380bc3bd84e49f66b2e5785de072d20b5df3a64f04e0c9',#npfsymqkfyrcpe',#adminadmin',
+        'HOST': 'ec2-54-83-28-144.compute-1.amazonaws.com',#'localhost',
         'PORT': '5432',
     }
 }

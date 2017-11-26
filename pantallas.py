@@ -155,10 +155,10 @@ class GameMenu():
 class Pantalla_Inicio():
     def __init__(self, screen):
         self.screen = screen
-        funcs = {'Iniciar': self.iniciar,
-                 'HighScore': self.mostrar_highscore,
-                 'Mostrar Creditos' : self.mostrar_creditos,
-                 'Salir': sys.exit}
+        funcs = {'Seleccionar nivel': self.iniciar,
+                 'Mostrar puntuación': self.mostrar_highscore,
+                 'Mostrar Créditos' : self.mostrar_creditos,
+                 'Salir del juego': sys.exit}
         pygame.display.set_caption("Froggy!")
         self.gameMenu = GameMenu(screen, funcs.keys(), funcs)
         
