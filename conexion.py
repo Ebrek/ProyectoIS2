@@ -2,7 +2,7 @@ import sqlite3
 conn = sqlite3.connect('db.sqlite3')
 conn.row_factory = sqlite3.Row
 
-class Conexion():
+class Conexion1(): # usa sqlite
 
     def listar_niveles(self):
         c = conn.cursor()
@@ -68,11 +68,15 @@ import json
 URL = 'http://localhost:8000/'
 
 
-class Conexion1():
+class Conexion(): # django con postgres
 
 
     def listar_niveles(self):
         REL = 'niveles/'
+        response = requests.get(URL + REL)
+        return response.json()
+    def obtener_nivel(self, nivel_id):
+        REL = 'niveles/' + str(nivel_id)
         response = requests.get(URL + REL)
         return response.json()
         
@@ -100,10 +104,10 @@ class Conexion1():
         return response.json()[0]
 
     def obtener_puntaje(self, nivel_id):
-        REL = 'puntajes/' + str(nivel_id)
+        REL = 'puntajes/?nivel_id' + str(nivel_id)
         response = requests.get(URL + REL).json()
         #ASC puntaje
-        #sorted_obj = dict(response.json()) 
+
         sorted_obj = sorted(response, key=lambda x : int(x['puntaje']), reverse=True)
 
         return sorted_obj

@@ -32,8 +32,8 @@ urlpatterns = [
 
     url(r'^historias/(?P<pk>.+)/$', views.Historia_Lista.as_view()),
     url(r'^historias/(?P<pk>[0-9]+)/', views.Historia_Detalle.as_view()),
-
     url(r'^historias/$', views.Historia_Lista.as_view()),
+    
     url(r'^puntajes/$', views.Puntaje_Lista.as_view()),
     url(r'^puntajes/(?P<pk>[0-9]+)/', views.Puntaje_Detalle.as_view()),
 

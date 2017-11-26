@@ -168,12 +168,24 @@ class Historia_Detalle(APIView):
 		snippet.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
 
-class Puntaje_Lista(APIView):
+class Puntaje_Lista(generics.ListCreateAPIView):
+	model = Puntaje
+	serializer_class = Puntaje_Serializer
 
-	def get(self, request):
-		puntajes = Puntaje.objects.all()
-		serializer = Puntaje_Serializer(puntajes, many=True)
-		return Response(serializer.data)
+	# Show all of the PASSENGERS in particular WORKSPACE
+	# or all of the PASSENGERS in particular AFIRLINE
+	def get_queryset(self):
+		queryset = Puntaje.objects.all()
+		nivel_id = self.request.query_params.get('nivel_id', None)
+
+		if nivel_id is not None:
+			queryset = queryset.filter(nivel_id=nivel_id)
+		return queryset
+
+	#def get(self, request):
+	#	puntajes = Puntaje.objects.all()
+	#	serializer = Puntaje_Serializer(puntajes, many=True)
+	#	return Response(serializer.data)
 
 	def post(self, request):
 		serializer = Puntaje_Serializer(data=request.data)

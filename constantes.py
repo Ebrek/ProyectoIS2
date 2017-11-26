@@ -14,7 +14,8 @@ WHITE = (255, 255, 255)
 OLIVE = (107, 142, 35)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
-
+LIGHT_BLUE= (173,216,230)
+LIGHT_YELOW = (255, 255, 204)
 DISPLAY = (WIN_WIDTH, WIN_HEIGHT)
 DEPTH = 32
 FLAGS = 0
@@ -22,7 +23,7 @@ CAMERA_SLACK = 30
 
 gravedad= 9.3
 
-REST_MODE = False
+REST_MODE = True
 
 def load_manager(element, isJson=False):
     print(element)
