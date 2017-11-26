@@ -10,6 +10,7 @@ from rest_framework import generics
 from django.http import JsonResponse
 from django.http import HttpResponse
 from django.core import serializers
+from rest_framework.parsers import JSONParser
 # Create your views here.
 
 class Nivel_Lista(generics.ListCreateAPIView):
@@ -168,6 +169,9 @@ class Historia_Detalle(APIView):
 		snippet.delete()
 		return Response(status=status.HTTP_204_NO_CONTENT)
 
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+@method_decorator(csrf_exempt, name='dispatch')
 class Puntaje_Lista(generics.ListCreateAPIView):
 	model = Puntaje
 	serializer_class = Puntaje_Serializer
@@ -186,8 +190,10 @@ class Puntaje_Lista(generics.ListCreateAPIView):
 	#	puntajes = Puntaje.objects.all()
 	#	serializer = Puntaje_Serializer(puntajes, many=True)
 	#	return Response(serializer.data)
-
+	@csrf_exempt
 	def post(self, request):
+		print(request.POST)
+		#data = JSONParser().parse(request)
 		serializer = Puntaje_Serializer(data=request.data)
 		if serializer.is_valid():
 			serializer.save()
@@ -226,11 +232,12 @@ class AjustesGeneral_Lista(APIView):
 		return Response(serializer.data)
 
 	def post(self, request):
-		serializer = AjustesGeneral_Serializer(data=request.data)
+		data = JSONParser().parse(request)
+		serializer = AjustesGeneral_Serializer(data=data)
 		if serializer.is_valid():
 			serializer.save()
-			return Response(serializer.data, status=status.HTTP_201_CREATED)
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+			return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+		return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 class AjustesGeneral_Detalle(APIView):
 	def get_object(self, pk):
 		try:

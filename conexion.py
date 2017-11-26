@@ -65,8 +65,7 @@ class Conexion1(): # usa sqlite
 ######################################################################################
 import requests
 import json
-URL = 'http://localhost:8000/'
-
+from constantes import URL
 
 class Conexion(): # django con postgres
 
@@ -104,7 +103,7 @@ class Conexion(): # django con postgres
         return response.json()[0]
 
     def obtener_puntaje(self, nivel_id):
-        REL = 'puntajes/?nivel_id' + str(nivel_id)
+        REL = 'puntajes/?nivel_id=' + str(nivel_id)
         response = requests.get(URL + REL).json()
         #ASC puntaje
 

@@ -3,7 +3,7 @@ import pygame
 from constantes import *
 from objetosestaticos import *
 from seresvivos import *
-from pantallas import GameMenu, Datos_partida
+from pantallas import GameMenu, Datos_partida, Pantalla_Puntuacion
 
 import json
 
@@ -31,9 +31,6 @@ class Partida():
         for element in self.niveles_data:
             bg_music = element["bg_music"]
             bg_image = element["bg_image"]
-            def load_level(param):
-                param.mainloop=False
-                self.cargar_nivel(element["id"], self.player_settings, bg_music, bg_image, screen)
             niveles_funciones[element["title"]] = function_builder(element["id"], bg_music, bg_image, screen)
 
         def mini_function(param):
@@ -48,7 +45,7 @@ class Partida():
     def cargar_nivel(self, id_nivel, player_settings, bg_music, bg_image, screen):
 
         
-        level = Level(id_nivel, player_settings, bg_music, bg_image, screen) #player_settings, PATH+'bg_music1.ogg')
+        level = Level(id_nivel, player_settings, bg_music, bg_image, screen)
         done = play_again = False
         timer = pygame.time.Clock()
         while not (done or play_again):
@@ -56,10 +53,7 @@ class Partida():
             if(level.update()==False):
                 play_again = True
             pygame.display.update()
-        if(play_again):
-            #self.cargar_nivel(id_nivel, player_settings, bg_music, bg_image)
-            pass
-        else:
+        if not play_again:
             pygame.quit()
             exit()
 
@@ -77,7 +71,7 @@ class Level():
         self.gemas = []
         self.corazon = []
         self.feather= []
-
+        self.id_nivel = id_nivel
         self.escenarios = [] # lista de mapas de nivel
         self.up = self.down = self.left = self.right = self.space = self.running = False
 
@@ -88,16 +82,10 @@ class Level():
         data_map = None
 
         for element in data:
-            '''if REST_MODE:
-                data_map = requests.get(element["mapa"]).json()
-            else:
-                with open(element["mapa"]) as json_file:
-                    data_map = json.load(json_file)'''
             data_map = load_manager(element["mapa"], isJson=True)
-            #data_map = json.load(load_manager(element["mapa"]))
             self.escenarios.append((element["id"], data_map))
         self.escenario_index = 0
-        self.level = self.escenarios[self.escenario_index] #inicializar en uno
+        self.level = self.escenarios[self.escenario_index]
 
         # build the level
 
@@ -115,12 +103,11 @@ class Level():
         except Exception:
             print("no bg music")
 
-        ####################################################################################################
 
         self.vidas_inicio = FROGGY_VIDA
         self.letra_datos = 20
         self.datos = Datos_partida("items/gem_9.png", "items/vida.png","items/feather.png",self.letra_datos, self.vidas_inicio)
-        ####################################################################################################
+
 
     def construir_mapa(self, level, player_settings):
         self.mostrar_historia(level[0], 'A')
@@ -149,7 +136,7 @@ class Level():
         sig_imagen = True
         for element in data:
             if sig_imagen:
-                image = pygame.image.load(load_manager(element["imagen"]))#PATH+element["imagen"])
+                image = pygame.image.load(load_manager(element["imagen"]))
                 image = pygame.transform.scale(image,(WIN_WIDTH,WIN_HEIGHT)).convert_alpha()
                 image_width, image_height= image.get_size()
                 screen.blit(image, ((WIN_WIDTH-image_width)/100, (WIN_HEIGHT-image_height)/100))
@@ -159,7 +146,7 @@ class Level():
                 for e in pygame.event.get():
                     if e.type == pygame.QUIT:
                         pygame.quit()
-                        sys.exit
+                        quit()
                     if e.type == pygame.KEYDOWN and e.key == pygame.K_TAB:
                         sig_imagen = True
     def pause(self):
@@ -168,7 +155,7 @@ class Level():
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     pygame.quit()
-                    sys.exit()
+                    quit()
                 if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
                     return
     def listenKey(self):
@@ -232,7 +219,9 @@ class Level():
                 self.construir_mapa(self.escenarios[self.escenario_index],self.player_settings)
                 return;
             else:
-                print("Ganasteeeeee") # mejorar aqui
+                pygame.mixer.Sound(PATH+'sounds/crowdapplause.wav').play()
+                b = Pantalla_Puntuacion(self.id_nivel, self.datos.puntaje)
+                b.mostrar()
                 return False
         if not self.player.update(self.up, self.down, self.left, self.right, self.space, self.running, self.platforms, self.enemies, self.entities,self.gemas, self.corazon, self.feather, self.datos, self.total_level_width, self.total_level_height):
             return False

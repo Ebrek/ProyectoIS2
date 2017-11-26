@@ -25,6 +25,8 @@ gravedad= 9.3
 
 REST_MODE = True
 
+URL = 'http://localhost:8000/'
+
 def load_manager(element, isJson=False):
     print(element)
     if REST_MODE:

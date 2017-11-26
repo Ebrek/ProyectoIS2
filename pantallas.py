@@ -156,6 +156,7 @@ class Pantalla_Inicio():
     def __init__(self, screen):
         self.screen = screen
         funcs = {'Iniciar': self.iniciar,
+                 'HighScore': self.mostrar_highscore,
                  'Mostrar Creditos' : self.mostrar_creditos,
                  'Salir': sys.exit}
         pygame.display.set_caption("Froggy!")
@@ -168,6 +169,10 @@ class Pantalla_Inicio():
         from nivel import Partida
         partida = Partida(param.screen)
         partida.mostrar_pantalla_niveles()
+
+    def mostrar_highscore(self, param):
+        hig = HighScore(param.screen)
+        hig.mostrar_pantalla_highsoce()
                                                             
     def mostrar_creditos(self, param):
         print("Creditos")
@@ -212,16 +217,16 @@ class Datos_partida():
 
 class Pantalla_Puntuacion():
 
-    def __init__(self, nivel_id, puntaje):
+    def __init__(self, nivel_id, puntaje, screen):
         #self.bg=bg
         # Create TextInput-object
         self.textinput = Resources.pygame_textinput.TextInput(text_color=OLIVE)
-        self.screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+        self.screen = screen
         self.clock = pygame.time.Clock()
         self.data = Conexion().obtener_puntaje(nivel_id)
         self.data_nivel= Conexion().obtener_nivel(nivel_id)
         self.puntaje = puntaje
-
+        self.nivel_id = nivel_id
     def draw_text(self,text,size,color,x,y, midtop=True):
         font = pygame.font.Font("freesansbold.ttf", size)
         text_surface = font.render(text,True,color)
@@ -245,14 +250,16 @@ class Pantalla_Puntuacion():
                 if event.type==pygame.KEYDOWN:
                     if event.key==pygame.K_RETURN:
                         #some codes
-                        print(self.textinput.get_text())
-                        # TODO retorna la wea, sube a la bd
+                        if self.puntaje != None:
+                            print(self.textinput.get_text())
+                            r = requests.post(URL + 'puntajes/', data={'player': self.textinput.get_text(), 'puntaje': self.puntaje, 'nivel': self.nivel_id})
+                            print(r.status_code, r.reason)
+                        # TODO retorna la wea
                         running = False
                     if event.key==pygame.K_BACKSPACE:
                         backspace = True
                 if event.type==pygame.KEYUP and event.key==pygame.K_BACKSPACE:
                     backspace = False
-
             pos_w_ini = 100
             pos_y_ini = 200
             count_y_ini = 0
@@ -280,7 +287,39 @@ class Pantalla_Puntuacion():
             pygame.display.update()
             self.clock.tick(60)
 
+class HighScore():
+    def __init__(self, screen):
+        #para cambiar niveles cambiar el nombre a level (no duplicados)
+        self.screen = screen
 
+        self.niveles_data = Conexion().listar_niveles()
+
+    def mostrar_pantalla_highsoce(self):
+
+        screen = self.screen
+        niveles_funciones = {}
+        def function_builder(nivel_id, puntaje, screen):
+            def function(param):
+                param.mainloop=False
+                p = Pantalla_Puntuacion(nivel_id, puntaje, screen)
+                p.mostrar()
+            return function
+        for element in self.niveles_data:
+            niveles_funciones[element["title"]] = function_builder(element["id"], None, screen)
+
+        def mini_function(param):
+            param.mainloop=False
+        niveles_funciones["Pantalla principal"] = mini_function
+
+        pygame.display.set_caption("Froggy!")
+        timer = pygame.time.Clock()
+        gm = GameMenu(screen, niveles_funciones.keys(), niveles_funciones)
+        gm.run()
+
+
+
+
+'''
 class Media_Screen():
     def __init__(self, timer, bg):
         self.timer = timer
@@ -303,7 +342,7 @@ class Media_Screen():
         text_rect.midtop = (x,y)
         self.screen.blit(text_surface, text_rect)
 
-'''class Start_Screen(Media_Screen):
+class Start_Screen(Media_Screen):
     def __init__(self, timer):
         Media_Screen.__init__(self, timer,(Background(PATH+'platform/bg_jungle.png', [0,0], (1280, 720))))
         self.screen=pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
