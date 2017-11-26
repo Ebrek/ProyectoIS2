@@ -46,6 +46,7 @@ class EnemyMosquito(Entity):
         #self.image.convert()
         #self.rect = pygame.Rect(x, y, image_rect[0], image_rect[1])
         self.disparado = False
+        self.froggy_disparo = False
     def update(self, platforms, enemies, entities, posX, posY, level_width, level_high):
         if(not self.disparado):
             self.xvel, self.yvel = self.xvel_ini, self.yvel_ini
@@ -103,6 +104,7 @@ class EnemyMosquito(Entity):
 
     def salir_disparado(self, dir):
         print("salidisparado")
+        self.froggy_disparo = True
         self.disparado = True
         if dir == 'derecha':
             self.xvel = 12.0
@@ -126,13 +128,16 @@ class EnemyMosquito(Entity):
                 return
         for e in enemies:
             if e != self and pygame.sprite.collide_rect(self, e):
-                self.disparado = False
-                self.xvel = 0
-                if isinstance(e, EnemySpider):
-                	e.perdervida(enemies, entities)
-                if isinstance(e, EnemyMosquito):
-                	e.perdervida(enemies, entities)
-                self.perdervida(enemies, entities)
+                
+                if isinstance(e, EnemySpider) or isinstance(e, EnemyMosquito):
+                    e.perdervida(enemies, entities)
+                elif isinstance(e, EnemyBoss) and self.froggy_disparo:
+                    e.perdervida(enemies, entities)
+                    self.perdervida(enemies, entities)
+                elif isinstance(e, EnemyBoss) == False:
+                    self.disparado = False
+                    self.xvel = 0
+                    self.perdervida(enemies, entities)
                 return
 
     def perdervida(self, enemies, entities):
@@ -236,7 +241,7 @@ class EnemyBoss(Entity):
     def __init__(self, x, y):
         Entity.__init__(self)
         data = Conexion().obtener_ajustesgeneral()
-        self.vida=data["mosquito_health"]
+        self.vida= 10 #data["mosquito_health"] esto debe ser cambiado por la data de la vida del boss
         self.contar = 0
         self.xvel_ini = data["mosquito_speed_x"]
         self.yvel_ini = data["mosquito_speed_y"]
@@ -255,7 +260,7 @@ class EnemyBoss(Entity):
         self.imagenes_izquierda = []
         self.imagenes_izquierda.append(self._image_origin)
         
-        for i in range(31):# boss
+        for i in range(32):# boss
             i=i+1
             im = pygame.image.load(PATH+ self.path_boss +"sprite_boss"+str(i)+".png")
             im = pygame.transform.scale(im, (256, 256)).convert_alpha()
@@ -266,6 +271,9 @@ class EnemyBoss(Entity):
         self.animacion = Animacion()
         self.contar_antes_cambiar_imagen = 0
         self.numero_para_cambiar_imagen = 4
+
+        self.enemy_get1 = None
+        self.enemy_get2 = None
         
 
     def update(self, platforms, enemies, entities, posX, posY, level_width, level_high):
@@ -277,34 +285,55 @@ class EnemyBoss(Entity):
             self.perdervida(enemies, entities)
         
 #########################################################################################################################
-        print('gg')
+
         self.animarBoss()
             
-        if self.contar == 56:
-            self.lanzarEnemigo(enemies, entities, self.rect[0] , self.rect[1])
-            self.contar = 0
+        self.lanzarEnemigo(enemies, entities, self.rect[0] , self.rect[1])
 
+        print(self.vida)
 
-        self.contar = self.contar + 1
 
 
     def lanzarEnemigo(self, enemies, entities, x, y):
-        ### esto debe ser cambiado para usar la cabeza del boss :v
-        lugar = randint(0, 1)
-        posicion =  [self.rect[3]*2/10, self.rect[3]*6/10]
-        q = EnemyMosquito( x- 50, y + posicion[lugar])
-        q.follow = True
-        enemies.append(q)
-        entities.add(q)
-        q.salir_disparadoBoss('izquierda')
+
+        if self.contar == 56:
+    
+            lugar = 0
+            cantidad = 0
+            posicion =  [self.rect[3]*2/10, self.rect[3]*6/10]
+            self.enemy_get1 = None
+            self.enemy_get2 = None
+            
+            if self.numero_imagen < 5 or self.numero_imagen > 24:
+                cantidad = 1
+                lugar = 0
+            elif self.numero_imagen > 8 and self.numero_imagen < 21:
+                cantidad = 1
+                lugar = 1
+            else:
+                cantidad = 2
+
+            for i in range(cantidad):
+            
+                q = EnemyMosquito( x + self.rect[2]/4, y + posicion[lugar])
+                q.follow = True
+                enemies.append(q)
+                entities.add(q)
+                q.salir_disparadoBoss('izquierda')
+                i = i + 1
+                lugar = 1
+                if self.enemy_get1 == None:
+                    self.enemy_get1 = q
+                else:
+                    self.enemy_get2 = q
+            self.contar = 0
+        self.contar = self.contar + 1
 
     def animarBoss(self):
         
         self.contar_antes_cambiar_imagen = self.contar_antes_cambiar_imagen + 1
         
         if self.contar_antes_cambiar_imagen == self.numero_para_cambiar_imagen:
-            print('xxxxx')
-            print(self.numero_imagen)
             self.contar_antes_cambiar_imagen = 0
             self.numero_imagen = self.animacion.animarIda(self.imagenes_izquierda, self.numero_imagen)
             self.image = self.imagenes_izquierda[self.numero_imagen]
