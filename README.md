@@ -1,10 +1,20 @@
-instalar: pygame, Pillow, numpy
+instalar: pygame, Pillow, numpy, django, requests, psycopg2, djangorestframework
 
 Windows
 py -m pip install --upgrade pip
 py -m pip install pygame --user
 py -m pip install Pillow --user
 py -m pip install numpy --user
+py -m pip install django
+py -m pip install djangorestframework
+py -m pip install psycopg2
+
+> ubicarse el la carpeta, dejar correr al servidor django
+py manage.py runserver
+> abrir otro terminal
+py main.py
+
+
 
 ----------------------------------
 aprobado -> queda esta good
