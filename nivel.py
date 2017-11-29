@@ -128,6 +128,7 @@ class Level():
         self.entities.add(self.player)
 
     def mostrar_historia(self, escenario_id, modalidad):
+        print("hisotria: " +str(escenario_id))
         self.up = self.down = self.left = self.right = self.space = self.running = False
         pygame.event.pump()
         pygame.event.clear()
@@ -216,8 +217,8 @@ class Level():
                 self.gemas = []
                 self.corazon = []
                 self.feather=[]
-                
-                self.construir_mapa(self.escenarios[self.escenario_index],self.player_settings)
+                self.level = self.escenarios[self.escenario_index]
+                self.construir_mapa(self.level,self.player_settings)
                 return;
             else:
                 pygame.mixer.Sound(PATH+'sounds/crowdapplause.wav').play()
