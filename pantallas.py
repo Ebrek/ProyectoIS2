@@ -161,7 +161,7 @@ class Pantalla_Inicio():
                  'Salir del juego': sys.exit}
         pygame.display.set_caption("Froggy!")
         self.gameMenu = GameMenu(screen, funcs.keys(), funcs)
-        
+
     def run(self):
         self.gameMenu.run()
 
@@ -173,9 +173,42 @@ class Pantalla_Inicio():
     def mostrar_highscore(self, param):
         hig = HighScore(param.screen)
         hig.mostrar_pantalla_highsoce()
-                                                            
-    def mostrar_creditos(self, param):
-        print("Creditos")
+
+    def mostrar_creditos(self, screen):
+        screen = pygame.display.set_mode((800, 600))
+        screen_r = screen.get_rect()
+        font = pygame.font.SysFont("freesansbold.ttf", 40)
+        clock = pygame.time.Clock()
+        credit_list = ["CREDITOS", " ",  "Froggy and the Spitters", " ", "DESARROLLADORES", " ", "Leo Wong Law", " ", "Angel Wong Law", " ", "Joan Pinto Albornoz", " ", "Franco Casanova Gonzalez", " ", "Aaron Aguero Estrella"]
+        texts =[]
+        for i, line in enumerate(credit_list):
+            s = font.render(line,1,OLIVE)
+            r = s.get_rect(centerx=screen_r.centerx, y=screen_r.bottom + i * 45)
+            texts.append((r, s))
+        while True:
+            for e in pygame.event.get():
+                if e.type == pygame.QUIT or e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
+                    return
+
+            screen.fill((0, 0, 0))
+
+            for r, s in texts:
+
+                r.move_ip(0, -1)
+
+                screen.blit(s, r)
+
+
+            if not screen_r.collidelistall([r for (r, _) in texts]):
+                return
+
+
+            pygame.display.flip()
+
+        
+            clock.tick(60)
+
+
 class Datos_partida():
     def __init__(self, image_path_gema, image_path_vida, image_path_feather, letra_datos, vidas_inicio):
         self.puntaje = 0
@@ -327,7 +360,7 @@ class Media_Screen():
     def wait_for_key(self):
         waiting = True
         while waiting:
-            self.timer.tick(FPS_RATE) 
+            self.timer.tick(FPS_RATE)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
