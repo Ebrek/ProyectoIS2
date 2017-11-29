@@ -110,7 +110,9 @@ class Level():
 
 
     def construir_mapa(self, level, player_settings):
-        self.mostrar_historia(level[0], 'A')
+        self.mostrar_historia(self.level[0], 'A')
+
+
         x = y = 0
         mapa = level[1]
         for row in mapa:
@@ -202,11 +204,11 @@ class Level():
         self.screen.blit(self.backGround.image, self.backGround.rect)
         # update player, draw everything else
         if self.player.onExitBlock:
+            self.mostrar_historia(self.level[0], 'D')
             #wea de apasar nivel
-
             self.escenario_index += 1
             if self.escenario_index < len(self.escenarios):
-                print("construido")
+                print("construyendo mapa")
                 self.entities = pygame.sprite.Group()
                 self.platforms = []
                 self.decorations = []
@@ -215,12 +217,11 @@ class Level():
                 self.corazon = []
                 self.feather=[]
                 
-                self.mostrar_historia(self.level[0], 'D')
                 self.construir_mapa(self.escenarios[self.escenario_index],self.player_settings)
                 return;
             else:
                 pygame.mixer.Sound(PATH+'sounds/crowdapplause.wav').play()
-                b = Pantalla_Puntuacion(self.id_nivel, self.datos.puntaje)
+                b = Pantalla_Puntuacion(self.id_nivel, self.datos.puntaje, self.screen)
                 b.mostrar()
                 return False
         if not self.player.update(self.up, self.down, self.left, self.right, self.space, self.running, self.platforms, self.enemies, self.entities,self.gemas, self.corazon, self.feather, self.datos, self.total_level_width, self.total_level_height):
